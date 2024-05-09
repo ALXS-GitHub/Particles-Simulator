@@ -21,11 +21,21 @@ public:
     }
 
     void moveForward(float distance) {
-        position += direction * distance;
+        // get the direction on the horizontal plane
+        glm::vec3 horizontalDirection = direction;
+        horizontalDirection.y = 0; // Project onto horizontal plane
+        horizontalDirection = glm::normalize(horizontalDirection); // Normalize to get direction on horizontal plane
+
+        position += horizontalDirection * distance;
     }
 
     void moveRight(float distance) {
-        position += glm::normalize(glm::cross(direction, up)) * distance;
+        glm::vec3 horizontalDirection = direction;
+        horizontalDirection.y = 0; // Project onto horizontal plane
+        horizontalDirection = glm::normalize(horizontalDirection); // Normalize to get direction on horizontal plane
+
+        glm::vec3 right = glm::cross(horizontalDirection, up);
+        position += right * distance;
     }
 
     void moveUp(float distance) {

@@ -2,6 +2,8 @@
 #include "classes/simulation.hpp"
 #include "classes/renderer.hpp"
 #include "classes/camera.hpp"
+#include "classes/plane.hpp"
+#include "classes/particle.hpp"
 #include "utils/texture_utils.hpp"
 #include "utils/camera_utils.hpp"
 #include "dependencies/glew/glew.h"
@@ -44,8 +46,14 @@ int main() {
     Simulation sim;
     Renderer renderer;
     vector<Sphere> spheres;
+    vector<Plane> planes;
 
-    renderer.createFloor("../assets/floor.png");
+    Plane floor(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(10.0f, 10.0f));
+    planes.push_back(floor);
+    Plane frontWall(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(10.0f, 10.0f));
+    planes.push_back(frontWall);
+    Plane rightWall(glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(10.0f, 10.0f));
+    planes.push_back(rightWall);
 
     // Create a camera
     glm::vec3 cameraPosition = glm::vec3(0.0f, 1.0f, 5.0f);  // position the camera in front of the particles
@@ -70,7 +78,6 @@ int main() {
     p2->radius = 0.3f;
     sim.particles.push_back(p2);
 
-
     while (!glfwWindowShouldClose(window)) {
         // Handle camera motion
         handleCameraMotion(window, camera);
@@ -79,7 +86,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Update simulation
-        // p->addForce(glm::vec3(0.0f, -0.0f, 0.001f));  // gravity
+        // p->addForce(glm::vec3(0.0f, -0.001f, 0.0f));  // gravity
         sim.step(0.01f);
 
         // Draw particles
@@ -87,7 +94,7 @@ int main() {
         renderer.draw(camera, sim.particles);
 
         // Draw the floor
-        renderer.drawFloor(camera);
+        renderer.drawPlanes(camera, planes);
 
         // Swap buffers
         glfwSwapBuffers(window);

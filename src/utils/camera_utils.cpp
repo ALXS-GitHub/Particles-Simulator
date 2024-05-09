@@ -58,7 +58,7 @@ void handleCameraMotion(GLFWwindow* window, Camera& camera) {
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
             camera.rotateVertical(-0.1f);
         }
-        if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-            camera.resetYaw();
-        }
+        // if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        //     camera.resetYaw();
+        // }
 }

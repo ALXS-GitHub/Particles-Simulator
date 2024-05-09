@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 #include "particle.hpp"
 #include "../utils/texture_utils.hpp"
+#include "plane.hpp"
 #include "camera.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glew.h>
@@ -236,55 +237,9 @@ GLuint Renderer::createShaderProgram(const std::string& vertexShaderFile, const 
     return shaderProgram;
 }
 
-void Renderer::createFloor(const std::string& textureFile) {
-    // Create floor mesh
-    float floorVertices[] = {
-        // positions          // texture coords
-        5.0f, 0.0f, -5.0f,   10.0f, 0.0f,
-        -5.0f, 0.0f, -5.0f,  0.0f, 0.0f,
-        -5.0f, 0.0f, 5.0f,   0.0f, 10.0f,
-
-        5.0f, 0.0f, -5.0f,   10.0f, 0.0f,
-        -5.0f, 0.0f, 5.0f,   0.0f, 10.0f,
-        5.0f, 0.0f, 5.0f,    10.0f, 10.0f
-    };
-
-    glGenVertexArrays(1, &floorVao);
-    glGenBuffers(1, &floorVbo);
-    glBindVertexArray(floorVao);
-    glBindBuffer(GL_ARRAY_BUFFER, floorVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glBindVertexArray(0);
-
-    // Load floor texture
-    floorTexture = loadTexture(textureFile.c_str());
-
-    // Set the texture wrapping/filtering options
-    glBindTexture(GL_TEXTURE_2D, floorTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Unbind the texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-}
-
-void Renderer::drawFloor(const Camera& camera) {
+void Renderer::drawPlanes(const Camera& camera, const std::vector<Plane>& planes) {
     // Use the shader program
     glUseProgram(floorShaderProgram);
-
-    // Bind the floor texture
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, floorTexture);
-
-    // Set the texture uniform
-    glUniform1i(glGetUniformLocation(floorShaderProgram, "texture1"), 0);
 
     // Set the view and projection matrix uniforms
     glm::mat4 viewMatrix = camera.getViewMatrix();
@@ -292,11 +247,20 @@ void Renderer::drawFloor(const Camera& camera) {
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
     glUniformMatrix4fv(glGetUniformLocation(floorShaderProgram, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
-    // Bind the floor VAO and draw the floor
-    glBindVertexArray(floorVao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    for (const Plane& plane : planes) {
+        // Bind the floor texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, plane.getTexture());
 
-    // Unbind the VAO and the texture
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+        // Set the texture uniform
+        glUniform1i(glGetUniformLocation(floorShaderProgram, "texture1"), 0);
+
+        // Bind the floor VAO and draw the floor
+        glBindVertexArray(plane.getVao());
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // Unbind the VAO and the texture
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 }
