@@ -2,6 +2,8 @@
 #include "classes/simulation.hpp"
 #include "classes/renderer.hpp"
 #include "classes/camera.hpp"
+#include "utils/texture_utils.hpp"
+#include "utils/camera_utils.hpp"
 #include "dependencies/glew/glew.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -35,19 +37,25 @@ int main() {
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
 
+    // Change the background color to sky blue
+    glClearColor(0.53f, 0.81f, 0.92f, 1.0f);
+
+
     Simulation sim;
     Renderer renderer;
     vector<Sphere> spheres;
 
+    renderer.createFloor("../assets/floor.png");
+
     // Create a camera
-    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 5.0f);  // position the camera in front of the particles
+    glm::vec3 cameraPosition = glm::vec3(0.0f, 1.0f, 5.0f);  // position the camera in front of the particles
     glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, -1.0f);  // looking towards the negative z-axis
-    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  // y-axis is up
+    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // y-axis is up
     Camera camera(cameraPosition, cameraDirection, cameraUp);
 
     // Add some particles
     shared_ptr<Sphere> p = make_shared<Sphere>();
-    p->position = glm::vec3(0.0f, 0.0f, 0.0f);  // position at the center
+    p->position = glm::vec3(0.0f, 1.0f, 0.0f);  // position at the center
     p->previous_position = p->position;
     p->velocity = glm::vec3(0.0f, 0.0f, 0.0f);  // no velocity
     p->acceleration = glm::vec3(0.0f, 0.0f, 0.0f);  // no acceleration
@@ -55,7 +63,7 @@ int main() {
     sim.particles.push_back(p);
 
     shared_ptr<Sphere> p2 = make_shared<Sphere>();
-    p2->position = glm::vec3(0.2f, 0.2f, 0.0f);  // position at the center
+    p2->position = glm::vec3(0.2f, 0.2f, 0.0f);  // position 
     p2->previous_position = p2->position;
     p2->velocity = glm::vec3(0.0f, 0.0f, 0.0f);  // no velocity
     p2->acceleration = glm::vec3(0.0f, 0.0f, 0.0f);  // no acceleration
@@ -64,16 +72,22 @@ int main() {
 
 
     while (!glfwWindowShouldClose(window)) {
+        // Handle camera motion
+        handleCameraMotion(window, camera);
+
         // Clear the screen and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Update simulation
-        p->addForce(glm::vec3(0.0f, -0.0f, 0.001f));  // gravity
+        // p->addForce(glm::vec3(0.0f, -0.0f, 0.001f));  // gravity
         sim.step(0.01f);
 
         // Draw particles
         // convert the particles to spheres
         renderer.draw(camera, sim.particles);
+
+        // Draw the floor
+        renderer.drawFloor(camera);
 
         // Swap buffers
         glfwSwapBuffers(window);

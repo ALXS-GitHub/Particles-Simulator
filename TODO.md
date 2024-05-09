@@ -1,7 +1,7 @@
 # TODO
 
 - Do the start of the README
-- Add some camera movements
+- Try to make to imports more easy (with static files only)
 - Upgrade the shaders to have more beautiful particles
 - Add a container for particles
 - Add some colors 

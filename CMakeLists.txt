@@ -12,9 +12,19 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/bin)
 
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4/glfw-3.4/include)
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glew)
+include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/stb)
 
 # Add your source files here
-add_executable(ParticlesSimulator src/main.cpp src/classes/particle.cpp src/classes/simulation.cpp src/classes/renderer.cpp src/classes/camera.cpp src/dependencies/glew/glew.c)
+add_executable(ParticlesSimulator 
+    src/main.cpp 
+    src/classes/particle.cpp 
+    src/classes/simulation.cpp 
+    src/classes/renderer.cpp 
+    src/classes/camera.cpp 
+    src/utils/camera_utils.cpp
+    src/utils/texture_utils.cpp
+    src/dependencies/glew/glew.c
+)
 # add_executable(ParticlesSimulator src/main.cpp src/classes/particle.cpp src/classes/simulation.cpp src/classes/renderer.cpp)
 
 add_definitions(-DGLEW_STATIC)
