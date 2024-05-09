@@ -14,7 +14,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4/glfw-3.4/inc
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glew)
 
 # Add your source files here
-add_executable(ParticlesSimulator src/main.cpp src/classes/particle.cpp src/classes/simulation.cpp src/classes/renderer.cpp src/dependencies/glew/glew.c)
+add_executable(ParticlesSimulator src/main.cpp src/classes/particle.cpp src/classes/simulation.cpp src/classes/renderer.cpp src/classes/camera.cpp src/dependencies/glew/glew.c)
 # add_executable(ParticlesSimulator src/main.cpp src/classes/particle.cpp src/classes/simulation.cpp src/classes/renderer.cpp)
 
 add_definitions(-DGLEW_STATIC)

@@ -9,11 +9,12 @@ public:
     vec3 previous_position;
     vec3 position;
     vec3 velocity;
-    vec3 force;
-    float mass;
+    vec3 acceleration;
     // other properties...
 
     virtual ~Particle() = default;
+    void addForce(vec3 force);
+
 };
 
 class Sphere : public Particle {

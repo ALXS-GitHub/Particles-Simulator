@@ -1,5 +1,7 @@
 #include "renderer.hpp"
 #include "particle.hpp"
+#include "camera.hpp"
+#include <glm/gtc/type_ptr.hpp>
 #include <glew.h>
 #include <fstream>
 #include <sstream>
@@ -17,7 +19,7 @@ Renderer::Renderer() {
     }
 }
 
-void Renderer::draw(const std::vector<std::shared_ptr<Particle>>& particles) { // note : shared_ptr (*) meaning we take the pointer to the particle (and this allow polymorphism if we don't use the pointer we cannot use children classes) and the & meaning we take the reference to the particle
+void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Particle>>& particles) { // note : shared_ptr (*) meaning we take the pointer to the particle (and this allow polymorphism if we don't use the pointer we cannot use children classes) and the & meaning we take the reference to the particle
     std::vector<float> data;
     for (const auto& particle : particles) {
         std::shared_ptr<Sphere> sphere = std::dynamic_pointer_cast<Sphere>(particle); // dynamic_pointer_cast is used to convert the pointer to the base class to the pointer to the derived class
@@ -44,6 +46,16 @@ void Renderer::draw(const std::vector<std::shared_ptr<Particle>>& particles) { /
 
     // Use the shader program
     glUseProgram(shaderProgram);
+
+    // Set the view matrix uniform
+    glm::mat4 viewMatrix = camera.getViewMatrix();
+    GLint viewMatrixLocation = glGetUniformLocation(shaderProgram, "viewMatrix");
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+    // Set the projection matrix uniform
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    GLint projectionMatrixLocation = glGetUniformLocation(shaderProgram, "projectionMatrix");
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
     // Set up the vertex attribute pointers and draw the particles
     glEnableVertexAttribArray(0);

@@ -1,6 +1,7 @@
 // main.cpp
 #include "classes/simulation.hpp"
 #include "classes/renderer.hpp"
+#include "classes/camera.hpp"
 #include "dependencies/glew/glew.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -31,17 +32,25 @@ int main() {
         return -1;
     }
 
+    // Enable depth testing
+    glEnable(GL_DEPTH_TEST);
+
     Simulation sim;
     Renderer renderer;
     vector<Sphere> spheres;
+
+    // Create a camera
+    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 5.0f);  // position the camera in front of the particles
+    glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, -1.0f);  // looking towards the negative z-axis
+    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);  // y-axis is up
+    Camera camera(cameraPosition, cameraDirection, cameraUp);
 
     // Add some particles
     shared_ptr<Sphere> p = make_shared<Sphere>();
     p->position = glm::vec3(0.0f, 0.0f, 0.0f);  // position at the center
     p->previous_position = p->position;
     p->velocity = glm::vec3(0.0f, 0.0f, 0.0f);  // no velocity
-    p->force = glm::vec3(0.0f, 0.0f, 0.0f);  // no force
-    p->mass = 1.0f;
+    p->acceleration = glm::vec3(0.0f, 0.0f, 0.0f);  // no acceleration
     p->radius = 0.2f;
     sim.particles.push_back(p);
 
@@ -49,22 +58,22 @@ int main() {
     p2->position = glm::vec3(0.2f, 0.2f, 0.0f);  // position at the center
     p2->previous_position = p2->position;
     p2->velocity = glm::vec3(0.0f, 0.0f, 0.0f);  // no velocity
-    p2->force = glm::vec3(-0.0001f, 0.0f, -0.001f);  // no force
-    p2->mass = 1.0f;
+    p2->acceleration = glm::vec3(0.0f, 0.0f, 0.0f);  // no acceleration
     p2->radius = 0.3f;
     sim.particles.push_back(p2);
 
 
     while (!glfwWindowShouldClose(window)) {
-        // Clear the screen
-        glClear(GL_COLOR_BUFFER_BIT);
+        // Clear the screen and depth buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Update simulation
+        p->addForce(glm::vec3(0.0f, -0.0f, 0.001f));  // gravity
         sim.step(0.01f);
 
         // Draw particles
         // convert the particles to spheres
-        renderer.draw(sim.particles);
+        renderer.draw(camera, sim.particles);
 
         // Swap buffers
         glfwSwapBuffers(window);

@@ -1,6 +1,8 @@
 # TODO
 
 - Do the start of the README
-- Change the step function in the simulation
-- Fix the z-axis moves for the simulation (the particle is disappearing)
+- Add some camera movements
+- Upgrade the shaders to have more beautiful particles
+- Add a container for particles
 - Add some colors 
+- Check the step function in the simulation
