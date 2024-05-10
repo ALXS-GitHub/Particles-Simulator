@@ -45,15 +45,17 @@ int main() {
 
     Simulation sim;
     Renderer renderer;
-    vector<Sphere> spheres;
-    vector<Plane> planes;
 
-    Plane floor(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(10.0f, 10.0f));
-    planes.push_back(floor);
-    Plane frontWall(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(10.0f, 10.0f));
-    planes.push_back(frontWall);
-    Plane rightWall(glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(10.0f, 10.0f));
-    planes.push_back(rightWall);
+    shared_ptr<Plane> floor = make_shared<Plane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-0.0f, 1.0f, 0.0f), glm::vec2(10.0f, 10.0f));
+    sim.planes.push_back(floor);
+    // shared_ptr<Plane> floor2 = make_shared<Plane>(glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(4.0f, 4.0f));
+    // sim.planes.push_back(floor2);
+    // shared_ptr<Plane> frontWall = make_shared<Plane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(4.0f, 4.0f));
+    // sim.planes.push_back(frontWall);
+    // shared_ptr<Plane> rightWall = make_shared<Plane>(glm::vec3(5.0f, 0.0f, 5.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(10.0f, 10.0f));
+    // sim.planes.push_back(rightWall);
+    // shared_ptr<Plane> slide = make_shared<Plane>(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(-1.0f, 2.0f, -1.0f), glm::vec2(10.0f, 10.0f));
+    // sim.planes.push_back(slide);
 
     // Create a camera
     glm::vec3 cameraPosition = glm::vec3(0.0f, 1.0f, 5.0f);  // position the camera in front of the particles
@@ -67,15 +69,15 @@ int main() {
     p->previous_position = p->position;
     p->velocity = glm::vec3(0.0f, 0.0f, 0.0f);  // no velocity
     p->acceleration = glm::vec3(0.0f, 0.0f, 0.0f);  // no acceleration
-    p->radius = 0.2f;
+    p->radius = 1.0f;
     sim.particles.push_back(p);
 
     shared_ptr<Sphere> p2 = make_shared<Sphere>();
-    p2->position = glm::vec3(0.2f, 0.2f, 0.0f);  // position 
+    p2->position = glm::vec3(1.0f, 1.0f, 0.0f);  // position 
     p2->previous_position = p2->position;
     p2->velocity = glm::vec3(0.0f, 0.0f, 0.0f);  // no velocity
     p2->acceleration = glm::vec3(0.0f, 0.0f, 0.0f);  // no acceleration
-    p2->radius = 0.3f;
+    p2->radius = 1.0f;
     sim.particles.push_back(p2);
 
     while (!glfwWindowShouldClose(window)) {
@@ -86,7 +88,8 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Update simulation
-        // p->addForce(glm::vec3(0.0f, -0.001f, 0.0f));  // gravity
+        // sim.addForce(glm::vec3(0.0f, -1.0f, 0.0f));  // gravity
+        // sim.checkCollisions();
         sim.step(0.01f);
 
         // Draw particles
@@ -94,7 +97,7 @@ int main() {
         renderer.draw(camera, sim.particles);
 
         // Draw the floor
-        renderer.drawPlanes(camera, planes);
+        renderer.drawPlanes(camera, sim.planes);
 
         // Swap buffers
         glfwSwapBuffers(window);

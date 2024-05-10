@@ -1,8 +1,13 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "plane.hpp"
+#include <memory>
 
 using namespace glm;
+
+class Particle;
+class Sphere;
 
 class Particle {
 public:
@@ -13,14 +18,18 @@ public:
     // other properties...
 
     virtual ~Particle() = default;
+    virtual void updatePosition(float dt);
+    virtual void collideWith(std::shared_ptr<Sphere> sphere) = 0;
+    virtual void collideWith(std::shared_ptr<Plane> plane) = 0;
     void addForce(vec3 force);
-
 };
 
 class Sphere : public Particle {
 public:
     float radius;
     // other properties...
+    void collideWith(std::shared_ptr<Sphere> sphere) override;
+    void collideWith(std::shared_ptr<Plane> plane) override;
 };
 
 // Path: src/classes/particle.hpp

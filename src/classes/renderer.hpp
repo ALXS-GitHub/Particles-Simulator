@@ -22,7 +22,7 @@ private:
 public:
     Renderer();
     void draw(const Camera& camera, const std::vector<std::shared_ptr<Particle>>& particles);
-    void drawPlanes(const Camera& camera, const std::vector<Plane>& planes);
+    void drawPlanes(const Camera& camera, const std::vector<std::shared_ptr<Plane>>& planes);
     GLuint createShaderProgram(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
     GLuint createShaderProgram(const std::string& vertexShaderFile, const std::string& geometryShaderFile, const std::string& fragmentShaderFile);
 };

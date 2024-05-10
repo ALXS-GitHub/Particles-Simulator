@@ -60,7 +60,7 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Part
     glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
     // Set the projection matrix uniform
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);
     GLint projectionMatrixLocation = glGetUniformLocation(shaderProgram, "projectionMatrix");
     glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
@@ -237,26 +237,26 @@ GLuint Renderer::createShaderProgram(const std::string& vertexShaderFile, const 
     return shaderProgram;
 }
 
-void Renderer::drawPlanes(const Camera& camera, const std::vector<Plane>& planes) {
+void Renderer::drawPlanes(const Camera& camera, const std::vector<std::shared_ptr<Plane>>& planes) {
     // Use the shader program
     glUseProgram(floorShaderProgram);
 
     // Set the view and projection matrix uniforms
     glm::mat4 viewMatrix = camera.getViewMatrix();
     glUniformMatrix4fv(glGetUniformLocation(floorShaderProgram, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);
     glUniformMatrix4fv(glGetUniformLocation(floorShaderProgram, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
-    for (const Plane& plane : planes) {
+    for (const auto& plane : planes) {
         // Bind the floor texture
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, plane.getTexture());
+        glBindTexture(GL_TEXTURE_2D, plane->getTexture());
 
         // Set the texture uniform
         glUniform1i(glGetUniformLocation(floorShaderProgram, "texture1"), 0);
 
         // Bind the floor VAO and draw the floor
-        glBindVertexArray(plane.getVao());
+        glBindVertexArray(plane->getVao());
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // Unbind the VAO and the texture

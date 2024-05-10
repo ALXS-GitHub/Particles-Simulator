@@ -41,5 +41,4 @@ class Plane {
         GLuint getTexture() const {
             return texture;
         }
-
 };

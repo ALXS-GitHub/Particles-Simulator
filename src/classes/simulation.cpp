@@ -1,13 +1,25 @@
 #include "simulation.hpp"
 
 void Simulation::step(float dt) {
-    // TODO check if this is the correct way to update the position
     for (auto& p : particles) {
-        glm::vec3 previous_position = p->position;
-        p->position += p->position - p->previous_position + p->acceleration * dt * dt;
-        p->previous_position = previous_position;
-        p->velocity = (p->position - p->previous_position) / dt; // for information only
-        p->acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
+        p->updatePosition(dt);
+    }
+}
+
+void Simulation::checkCollisions() {
+    for (auto& p1 : particles) {
+        for (auto& p2 : particles) {
+            if (p1 != p2) {
+                // TODO prevent this dynamic cast later
+                auto sphere = std::dynamic_pointer_cast<Sphere>(p2);
+                if (sphere) {
+                    p1->collideWith(sphere);
+                }
+            }
+        }
+        for (auto& plane : planes) {
+            p1->collideWith(plane);
+        }
     }
 }
 

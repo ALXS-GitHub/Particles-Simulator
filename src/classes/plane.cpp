@@ -9,7 +9,9 @@ Plane::Plane(glm::vec3 position, glm::vec3 normal, glm::vec2 size)
     : position(position), normal(normal), size(size) {
 
     normal = glm::normalize(normal);
-    
+    float sx = size.x / 2; // in order to have the size of the plane centered at the position
+    float sy = size.y / 2;
+
     glm::vec3 u;
     std::vector<float> vertices;
     // Create two perpendicular vectors on the plane
@@ -20,15 +22,15 @@ Plane::Plane(glm::vec3 position, glm::vec3 normal, glm::vec2 size)
     }
         // Scale the vectors by the size of the plane
     glm::vec3 v = glm::cross(normal, u);
-    u *= size.x;
-    v *= size.y;
+    u *= sx;
+    v *= sy;
     vertices = {
         // positions          // texture coords
-        (position + u + v).x, (position + u + v).y, (position + u + v).z, size.x, size.y,
+        (position + u + v).x, (position + u + v).y, (position + u + v).z, sx, sy,
         (position - u - v).x, (position - u - v).y, (position - u - v).z, 0.0f, 0.0f,
-        (position - u + v).x, (position - u + v).y, (position - u + v).z, 0.0f, size.y,
-        (position + u - v).x, (position + u - v).y, (position + u - v).z, size.x, 0.0f,
-        (position + u + v).x, (position + u + v).y, (position + u + v).z, size.x, size.y,
+        (position - u + v).x, (position - u + v).y, (position - u + v).z, 0.0f, sy,
+        (position + u - v).x, (position + u - v).y, (position + u - v).z, sx, 0.0f,
+        (position + u + v).x, (position + u + v).y, (position + u + v).z, sx, sy,
         (position - u - v).x, (position - u - v).y, (position - u - v).z, 0.0f, 0.0f
     };
     glGenVertexArrays(1, &vao);
