@@ -7,13 +7,13 @@
 
 class Simulation {
 private: 
-    int num_particles;
+    int num_particles = 0;
 
 public:
     std::vector<std::shared_ptr<Particle>> particles;
     std::vector<std::shared_ptr<Plane>> planes;
 
-    void getNumParticles();
+    int getNumParticles();
     void step(float dt);  // update simulation by time dt
     void checkCollisions();  // check for collisions between particles and planes
     void addForce(glm::vec3 force);  // add force to all particles

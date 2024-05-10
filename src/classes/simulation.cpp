@@ -1,5 +1,9 @@
 #include "simulation.hpp"
 
+int Simulation::getNumParticles() {
+    return num_particles;
+}
+
 void Simulation::step(float dt) {
     for (auto& p : particles) {
         p->updatePosition(dt);
@@ -37,4 +41,5 @@ void Simulation ::createSphere(glm::vec3 position, float radius, glm::vec3 veloc
     p->acceleration = acceleration;
     p->radius = radius;
     particles.push_back(p);
+    this->num_particles++;
 }
