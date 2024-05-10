@@ -28,3 +28,13 @@ void Simulation::addForce(glm::vec3 force) {
         p->addForce(force);
     }
 }
+
+void Simulation ::createSphere(glm::vec3 position, float radius, glm::vec3 velocity, glm::vec3 acceleration) {
+    auto p = std::make_shared<Sphere>();
+    p->position = position;
+    p->previous_position = position;
+    p->velocity = velocity;
+    p->acceleration = acceleration;
+    p->radius = radius;
+    particles.push_back(p);
+}

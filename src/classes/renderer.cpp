@@ -35,7 +35,7 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Part
             data.push_back(sphere->position.x);
             data.push_back(sphere->position.y);
             data.push_back(sphere->position.z);
-            data.push_back(sphere->radius);
+            data.push_back(sphere->radius*2.421); // TODO fix this later to render the sphere properly
         } else {
             // If the particle is not a sphere, add its position to the data and use a default radius
             data.push_back(particle->position.x);
