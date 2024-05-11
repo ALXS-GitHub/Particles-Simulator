@@ -92,7 +92,7 @@ int main() {
         float substep_dt = dt / NUM_SUBSTEPS;
         for (int j = 0; j < NUM_SUBSTEPS; j++) {
             sim.checkCollisions();
-            sim.addForce(glm::vec3(0.0f, -20.0f, 0.0f));  // gravity
+            sim.addForce(glm::vec3(0.0f, -10.0f, 0.0f));  // gravity
             sim.step(substep_dt);
         }
 

@@ -29,12 +29,17 @@ public:
         position += horizontalDirection * distance;
     }
 
+    void moveInDirection(float distance) {
+        position += glm::normalize(direction) * distance;
+    }
+
     void moveRight(float distance) {
         glm::vec3 horizontalDirection = direction;
         horizontalDirection.y = 0; // Project onto horizontal plane
         horizontalDirection = glm::normalize(horizontalDirection); // Normalize to get direction on horizontal plane
 
         glm::vec3 right = glm::cross(horizontalDirection, up);
+        right = glm::normalize(right);
         position += right * distance;
     }
 

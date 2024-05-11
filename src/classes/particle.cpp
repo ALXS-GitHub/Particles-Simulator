@@ -12,9 +12,9 @@ void Particle::addForce(vec3 force) {
 }
 
 void Particle::updatePosition(float dt) {
-    vec3 previous_position = position;
+    vec3 position_copy = position;
     position += position - previous_position + acceleration * dt * dt;
-    previous_position = previous_position;
+    previous_position = position_copy;
     velocity = (position - previous_position) / dt; // for information only
     acceleration = vec3(0.0f, 0.0f, 0.0f);
 }
