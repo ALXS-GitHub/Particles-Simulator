@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(ParticlesSimulator)
 
 set(CMAKE_CXX_STANDARD 14)
+# SET( CMAKE_CXX_COMPILER g++) # cmake -G "MinGW Makefiles" ..
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/bin)
@@ -11,8 +12,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/bin)
 # enable_language(CUDA)
 
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4/glfw-3.4/include)
+include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glm)
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glew)
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/stb)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /O2 /Wall /W4 /openmp") # msvc
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3 -Wall -Wextra -fopenmp") # g++
 
 # Add your source files here
 add_executable(ParticlesSimulator 
@@ -23,7 +28,6 @@ add_executable(ParticlesSimulator
     src/classes/camera.cpp 
     src/classes/plane.cpp
     src/classes/mesh.cpp
-    src/classes/model.cpp
     src/utils/camera_utils.cpp
     src/utils/texture_utils.cpp
     src/dependencies/glew/glew.c
@@ -32,7 +36,6 @@ add_executable(ParticlesSimulator
 
 add_definitions(-DGLEW_STATIC)
 
-include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glm)
 
 # link_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4/glfw-3.4/build/src/Debug)
 find_library(GLFW_LIBRARY NAMES glfw3 PATHS ${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4/glfw-3.4/build/src/Debug)

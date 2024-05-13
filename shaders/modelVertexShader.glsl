@@ -8,7 +8,8 @@ layout (location = 4) in float instanceScale;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
-// out vec3 fragmentPos;
+out vec3 fragmentPos;
+out vec3 fragNormal;
 
 // TODO compute the scale later
 mat4 translationMatrix(vec3 translation, float scale)
@@ -25,6 +26,7 @@ mat4 translationMatrix(vec3 translation, float scale)
 void main()
 {
     mat4 model = translationMatrix(instancePos, instanceScale);
-    // fragmentPos = vec3(model * vec4(aPos, 1.0));
+    fragmentPos = vec3(model * vec4(aPos, 1.0));
+    fragNormal = aNormal;
     gl_Position = projectionMatrix * viewMatrix * model * vec4(aPos, 1.0);
 }

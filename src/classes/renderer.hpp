@@ -24,7 +24,6 @@ public:
     GLuint modelShaderProgram;
     Renderer();
     void draw(const Camera& camera, const std::vector<std::shared_ptr<Particle>>& particles);
-    void draw(const Camera& camera, const std::vector<std::shared_ptr<Particle>>& particles, Mesh& mesh);
     void draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& sphere, Mesh& mesh);
     void drawPlanes(const Camera& camera, const std::vector<std::shared_ptr<Plane>>& planes);
     GLuint createShaderProgram(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);

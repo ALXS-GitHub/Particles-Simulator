@@ -8,11 +8,14 @@
 class Simulation {
 private: 
     int num_particles = 0;
+    int num_threads = 4;
 
 public:
     std::vector<std::shared_ptr<Particle>> particles;
     std::vector<std::shared_ptr<Sphere>> spheres;
     std::vector<std::shared_ptr<Plane>> planes;
+
+    Simulation();
 
     int getNumParticles();
     void step(float dt);  // update simulation by time dt

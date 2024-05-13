@@ -8,7 +8,6 @@
 #include "utils/camera_utils.hpp"
 #include "dependencies/glew/glew.h"
 #include "classes/mesh.hpp"
-#include "classes/model.hpp"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
@@ -47,6 +46,9 @@ int main() {
     // Change the background color to sky blue
     glClearColor(0.53f, 0.81f, 0.92f, 1.0f);
 
+    // disable vsync
+    glfwSwapInterval(0);
+
     // Simulation times
     int nbFrames = 0;
     float dt = 0.1f;
@@ -56,8 +58,7 @@ int main() {
     Renderer renderer;
 
     // load a model
-    Model model("../models/sphere.obj");
-    Mesh mesh = model.createMesh();
+    Mesh mesh = Mesh("../models/sphere.obj", true);
     // mesh.addPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 
     shared_ptr<Plane> floor = make_shared<Plane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-0.0f, 1.0f, 0.0f), glm::vec2(10.0f, 10.0f));
@@ -79,7 +80,8 @@ int main() {
 
     // Add some spheres
     sim.createSphere(glm::vec3(0.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    sim.createSphere(glm::vec3(0.6f, 2.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    sim.createSphere(glm::vec3(0.6f, 2.5f, 0.0f), 0.55f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     while (!glfwWindowShouldClose(window)) {
 

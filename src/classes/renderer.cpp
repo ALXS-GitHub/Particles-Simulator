@@ -96,28 +96,6 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphe
 
     // Use the shader program
     mesh.draw(modelShaderProgram, camera, positions, scales);
-
-}
-
-void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Particle>>& particles, Mesh& mesh) {
-
-    std::vector<glm::vec3> positions;
-    std::vector<float> scales;
-
-    for (const auto& particle : particles) {
-        std::shared_ptr<Sphere> sphere = std::dynamic_pointer_cast<Sphere>(particle);
-        if (sphere) {
-            positions.push_back(sphere->position);
-            scales.push_back(sphere->radius);
-        } else {
-            positions.push_back(particle->position);
-            scales.push_back(0.0f);
-        }
-    }
-
-    // Use the shader program
-    mesh.draw(modelShaderProgram, camera, positions, scales);
-
 }
 
 GLuint Renderer::createShaderProgram(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {

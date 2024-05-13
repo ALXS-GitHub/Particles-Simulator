@@ -1,10 +1,13 @@
 # TODO
 
-- Clean the code and classes
-- Do the start of the README
+
 - Try to make to imports more easy (with static files only)
-- Upgrade the shaders to have more beautiful particles with lighting
+- Manage bounces on the walls (because for the moment they just stop)
 - Make the grid layout for better performance
+- Try to use G++ instead of MSVC (and compare the performance)
+- Continue the README
+- Try hybrid parallelism (OpenMP + MPI)
+- Try to use CUDA for the particles simulation
 
 ## other
 
