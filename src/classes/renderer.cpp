@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include "mesh.hpp"
 
 Renderer::Renderer() {
     // Create a shader program
@@ -24,6 +25,11 @@ Renderer::Renderer() {
         std::cerr << "Failed to create floor shader program" << std::endl;
         exit(EXIT_FAILURE);
     }
+    modelShaderProgram = createShaderProgram("shaders/modelVertexShader.glsl", "shaders/modelFragmentShader.glsl");
+    if (shaderProgram == 0) {
+        std::cerr << "Failed to create shader program" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
 void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Particle>>& particles) { // note : shared_ptr (*) meaning we take the pointer to the particle (and this allow polymorphism if we don't use the pointer we cannot use children classes) and the & meaning we take the reference to the particle
@@ -35,7 +41,7 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Part
             data.push_back(sphere->position.x);
             data.push_back(sphere->position.y);
             data.push_back(sphere->position.z);
-            data.push_back(sphere->radius*2.421); // TODO fix this later to render the sphere properly
+            data.push_back(sphere->radius); // TODO fix this later to render the sphere properly
         } else {
             // If the particle is not a sphere, add its position to the data and use a default radius
             data.push_back(particle->position.x);
@@ -77,6 +83,41 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Part
     glDisableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDeleteBuffers(1, &vbo);
+}
+
+void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& sphere, Mesh& mesh) {
+    std::vector<glm::vec3> positions;
+    std::vector<float> scales;
+
+    for (const auto& s : sphere) {
+        positions.push_back(s->position);
+        scales.push_back(s->radius);
+    }
+
+    // Use the shader program
+    mesh.draw(modelShaderProgram, camera, positions, scales);
+
+}
+
+void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Particle>>& particles, Mesh& mesh) {
+
+    std::vector<glm::vec3> positions;
+    std::vector<float> scales;
+
+    for (const auto& particle : particles) {
+        std::shared_ptr<Sphere> sphere = std::dynamic_pointer_cast<Sphere>(particle);
+        if (sphere) {
+            positions.push_back(sphere->position);
+            scales.push_back(sphere->radius);
+        } else {
+            positions.push_back(particle->position);
+            scales.push_back(0.0f);
+        }
+    }
+
+    // Use the shader program
+    mesh.draw(modelShaderProgram, camera, positions, scales);
+
 }
 
 GLuint Renderer::createShaderProgram(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {

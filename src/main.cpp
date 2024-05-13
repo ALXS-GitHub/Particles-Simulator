@@ -7,6 +7,8 @@
 #include "utils/texture_utils.hpp"
 #include "utils/camera_utils.hpp"
 #include "dependencies/glew/glew.h"
+#include "classes/mesh.hpp"
+#include "classes/model.hpp"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
@@ -52,6 +54,11 @@ int main() {
 
     Simulation sim;
     Renderer renderer;
+
+    // load a model
+    Model model("../models/sphere.obj");
+    Mesh mesh = model.createMesh();
+    // mesh.addPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 
     shared_ptr<Plane> floor = make_shared<Plane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-0.0f, 1.0f, 0.0f), glm::vec2(10.0f, 10.0f));
     sim.planes.push_back(floor);
@@ -99,10 +106,11 @@ int main() {
 
         // Draw particles
         // convert the particles to spheres
-        renderer.draw(camera, sim.particles);
+        renderer.draw(camera, sim.spheres, mesh);
 
         // Draw the floor
         renderer.drawPlanes(camera, sim.planes);
+        // mesh.draw(renderer.modelShaderProgram, camera, {glm::vec3(3.0f, 1.0f, 0.0f)});
 
         // Swap buffers
         glfwSwapBuffers(window);

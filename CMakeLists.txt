@@ -22,6 +22,8 @@ add_executable(ParticlesSimulator
     src/classes/renderer.cpp 
     src/classes/camera.cpp 
     src/classes/plane.cpp
+    src/classes/mesh.cpp
+    src/classes/model.cpp
     src/utils/camera_utils.cpp
     src/utils/texture_utils.cpp
     src/dependencies/glew/glew.c

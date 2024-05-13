@@ -11,6 +11,7 @@ private:
 
 public:
     std::vector<std::shared_ptr<Particle>> particles;
+    std::vector<std::shared_ptr<Sphere>> spheres;
     std::vector<std::shared_ptr<Plane>> planes;
 
     int getNumParticles();

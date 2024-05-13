@@ -41,5 +41,6 @@ void Simulation ::createSphere(glm::vec3 position, float radius, glm::vec3 veloc
     p->acceleration = acceleration;
     p->radius = radius;
     particles.push_back(p);
+    spheres.push_back(p);
     this->num_particles++;
 }
