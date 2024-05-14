@@ -8,8 +8,21 @@ This is my personal 3D particles simulator that uses OpenGL and C++. It is a pro
 
 First install all the included libraries (glew, stb, glm, glfw). (I will try to make this step easier in the future)
 
-This project was developed using MSVC and CMake. To compile it, you need to have CMake installed and a C++ compiler that supports C++17. You can use the following commands to compile the project:
+This project was developed using g++ and CMake. To compile it, you need to have CMake and g++ installed on your machine.
 
+then you can compile the project using the following commands :
+
+```bash
+mkdir bin
+mkdir build
+cd build
+cmake -G "MinGW Makefiles" ..
+make
+```
+
+The executable will be in the bin folder.
+
+MSVC version, (make sure to modify the CMakeLists.txt file to use the correct libraries path in this case, because the libraries are different from the one used in the G++ version) :
 ```bash
 mkdir bin
 mkdir build

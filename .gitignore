@@ -35,4 +35,5 @@
 /bin
 /src/dependencies/glew-2.2.0
 /src/dependencies/glfw-3.4
+/src/dependencies/glfw-3.4.bin.WIN64
 /src/dependencies/glm

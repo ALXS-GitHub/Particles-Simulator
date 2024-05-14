@@ -29,7 +29,7 @@ void main()
 
     // vec3 ambientColor = lightColor * ambientStrength;
 
-    vec3 color = vec3(1.0f, 1.0f, 0.5f);
+    vec3 color = vec3(0.8f, 0.8f, 0.8f);
 
-    FragColor = vec4(color * (ambientStrength + diffuse), 1.0f);
+    FragColor = vec4(color * (ambientStrength + diffuse), 0.3f);
 }

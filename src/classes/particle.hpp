@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "plane.hpp"
+#include "container.hpp"
 #include <memory>
 
 using namespace glm;
@@ -21,6 +22,7 @@ public:
     virtual void updatePosition(float dt);
     virtual void collideWith(std::shared_ptr<Sphere> sphere) = 0;
     virtual void collideWith(std::shared_ptr<Plane> plane) = 0;
+    virtual void collideWith(std::shared_ptr<CubeContainer> container) = 0;
     void addForce(vec3 force);
 };
 
@@ -30,6 +32,7 @@ public:
     // other properties...
     void collideWith(std::shared_ptr<Sphere> sphere) override;
     void collideWith(std::shared_ptr<Plane> plane) override;
+    void collideWith(std::shared_ptr<CubeContainer> container) override;
 };
 
 // Path: src/classes/particle.hpp

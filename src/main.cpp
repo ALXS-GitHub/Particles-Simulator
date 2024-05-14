@@ -43,6 +43,14 @@ int main() {
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
 
+    // Enable face culling (to hide the back faces of the cubes)
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
+    // transparency blending function
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     // Change the background color to sky blue
     glClearColor(0.53f, 0.81f, 0.92f, 1.0f);
 
@@ -58,22 +66,26 @@ int main() {
     Renderer renderer;
 
     // load a model
-    Mesh mesh = Mesh("../models/sphere.obj", true);
+    Mesh mesh = Mesh("../models/sphere.obj", true, false);
     // mesh.addPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+    
+    // load the mesh for the container
+    Mesh containerMesh = Mesh("../models/cube.obj", true, true);
 
-    shared_ptr<Plane> floor = make_shared<Plane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-0.0f, 1.0f, 0.0f), glm::vec2(10.0f, 10.0f));
-    sim.planes.push_back(floor);
-    shared_ptr<Plane> leftWall = make_shared<Plane>(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(10.0f, 10.0f));
-    sim.planes.push_back(leftWall);
-    shared_ptr<Plane> rightWall = make_shared<Plane>(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(10.0f, 10.0f));
-    sim.planes.push_back(rightWall);
-    shared_ptr<Plane> backWall = make_shared<Plane>(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(10.0f, 10.0f));
-    sim.planes.push_back(backWall);
-    shared_ptr<Plane> frontWall = make_shared<Plane>(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(10.0f, 10.0f));
-    sim.planes.push_back(frontWall);
+    // setting up the planes
+    // shared_ptr<Plane> floor = make_shared<Plane>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-0.0f, 1.0f, 0.0f), glm::vec2(10.0f, 10.0f));
+    // sim.planes.push_back(floor);
+    // shared_ptr<Plane> leftWall = make_shared<Plane>(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(10.0f, 10.0f));
+    // sim.planes.push_back(leftWall);
+    // shared_ptr<Plane> rightWall = make_shared<Plane>(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(10.0f, 10.0f));
+    // sim.planes.push_back(rightWall);
+    // shared_ptr<Plane> backWall = make_shared<Plane>(glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(10.0f, 10.0f));
+    // sim.planes.push_back(backWall);
+    // shared_ptr<Plane> frontWall = make_shared<Plane>(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(10.0f, 10.0f));
+    // sim.planes.push_back(frontWall);
 
     // Create a camera
-    glm::vec3 cameraPosition = glm::vec3(0.0f, 1.0f, 5.0f);  // position the camera in front of the particles
+    glm::vec3 cameraPosition = glm::vec3(0.0f, 1.0f, 15.0f);  // position the camera in front of the particles
     glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, -1.0f);  // looking towards the negative z-axis
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // y-axis is up
     Camera camera(cameraPosition, cameraDirection, cameraUp);
@@ -83,12 +95,23 @@ int main() {
     sim.createSphere(glm::vec3(0.6f, 2.5f, 0.0f), 0.55f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
     sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
+    // setting up the container
+    sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+
     while (!glfwWindowShouldClose(window)) {
 
         // if user press G, add a new sphere
         if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
             // sim.createSphere(glm::vec3((rand() / (float)RAND_MAX) * 9.0f - 4.5f, 5.0f, (rand() / (float)RAND_MAX) * 9.0f - 4.5f), 0.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
             sim.createSphere(glm::vec3((rand()/ (float)RAND_MAX * 1.0f - 0.5f), 1.0f, (rand() / (float)RAND_MAX) * 1.0f - 0.5f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+        }
+
+        // if use press T, attract all the particles to the center and counteract gravity
+        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+            for (auto& p : sim.particles) {
+                p->addForce(glm::vec3(0.0f, 10.0f, 0.0f) * (float)NUM_SUBSTEPS); // not very accurate since the force is applied multiple times in the in the same frame (but it's good enough for this purpose)
+                p->addForce(-p->position * 30.0f);
+            }
         }
 
         // Handle camera motion
@@ -113,6 +136,10 @@ int main() {
         // Draw the floor
         renderer.drawPlanes(camera, sim.planes);
         // mesh.draw(renderer.modelShaderProgram, camera, {glm::vec3(3.0f, 1.0f, 0.0f)});
+
+        glEnable(GL_BLEND); // enable transparency
+        renderer.drawContainer(camera, sim.containers, containerMesh);
+        glDisable(GL_BLEND); // disable transparency
 
         // Swap buffers
         glfwSwapBuffers(window);

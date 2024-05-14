@@ -9,12 +9,12 @@
 #include <sstream>
 #include "camera.hpp"
 
-Mesh::Mesh (const std::string& filename, bool instanced) {
+Mesh::Mesh (const std::string& filename, bool instanced, bool single) {
     loadFromFile(filename);
-    setupMesh(instanced);
+    setupMesh(instanced, single);
 }
 
-void Mesh::setupMesh(bool instanced) {
+void Mesh::setupMesh(bool instanced, bool single) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &VBOPosition);
@@ -34,19 +34,35 @@ void Mesh::setupMesh(bool instanced) {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
 
     if (instanced) {
+        if (!single) {
         glGenBuffers(1, &VBOPosition);
         glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
-        glBufferData(GL_ARRAY_BUFFER, 10000 * sizeof(glm::vec3) * 3, NULL, GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 10000 * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
         glEnableVertexAttribArray(3);
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
         glVertexAttribDivisor(3, 1);
 
         glGenBuffers(1, &VBOscale);
         glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
-        glBufferData(GL_ARRAY_BUFFER, 10000 * sizeof(float), NULL, GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 10000 * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
         glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)0);
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
         glVertexAttribDivisor(4, 1);
+        } else { // case when we draw a single mesh
+        glGenBuffers(1, &VBOPosition);
+        glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+        glVertexAttribDivisor(3, 1);
+
+        glGenBuffers(1, &VBOscale);
+        glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+        glVertexAttribDivisor(4, 1);
+    }
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -54,7 +70,7 @@ void Mesh::setupMesh(bool instanced) {
     glBindVertexArray(0);
 }
 
-void Mesh::draw(GLuint ShaderProgram, const Camera& camera, std::vector<glm::vec3> positions, std::vector<float> scales) {
+void Mesh::draw(GLuint ShaderProgram, const Camera& camera, std::vector<glm::vec3> positions, std::vector<glm::vec3> scales) {
     glUseProgram(ShaderProgram);
 
     glm::mat4 view = camera.getViewMatrix();
@@ -69,7 +85,7 @@ void Mesh::draw(GLuint ShaderProgram, const Camera& camera, std::vector<glm::vec
     glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(glm::vec3), &positions[0]);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, scales.size() * sizeof(float), &scales[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, scales.size() * sizeof(glm::vec3), &scales[0]);
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, vertices.size(), positions.size());
     glBindVertexArray(0);

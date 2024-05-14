@@ -3,6 +3,7 @@
 #include <memory>
 #include <iostream>
 #include "plane.hpp"
+#include "container.hpp"
 
 using namespace std;
 using namespace glm;
@@ -61,4 +62,37 @@ void Sphere::collideWith(std::shared_ptr<Plane> plane) {
             position += penetration * normal * sign(glm::dot(normal, axis)); // * sign(glm::dot(normal, axis)) to make sure the sphere moves in the right direction
         }
     }
+}
+
+void Sphere::collideWith(std::shared_ptr<CubeContainer> container) {
+    // Collision resolution code
+    glm::vec3 size = container->getSize();
+    glm::vec3 min = container->getPosition() - size / 2.0f; // getting the minimum points of the container
+    glm::vec3 max = container->getPosition() + size / 2.0f; // getting the maximum points of the container
+    // Check if the sphere is inside the container
+    if (!(min.x <= position.x && position.x <= max.x && min.y <= position.y && position.y <= max.y && min.z <= position.z && position.z <= max.z)) {
+        // the sphere is outside the container
+        return;
+    }
+
+    // Collision resolution code
+    if (position.x - radius < min.x) {
+        position.x = min.x + radius;
+    } 
+    if (position.x + radius > max.x) {
+        position.x = max.x - radius;
+    }
+    if (position.y - radius < min.y) {
+        position.y = min.y + radius;
+    }
+    if (position.y + radius > max.y) {
+        position.y = max.y - radius;
+    }
+    if (position.z - radius < min.z) {
+        position.z = min.z + radius;
+    }
+    if (position.z + radius > max.z) {
+        position.z = max.z - radius;
+    }
+
 }

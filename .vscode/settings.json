@@ -59,5 +59,8 @@
         "xlocmon": "cpp",
         "xlocnum": "cpp",
         "xloctime": "cpp"
-    }
+    },
+    "cSpell.words": [
+        "OPENMP"
+    ]
 }

@@ -3,6 +3,7 @@
 #include "../utils/texture_utils.hpp"
 #include "plane.hpp"
 #include "camera.hpp"
+#include "container.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glew.h>
 #include <fstream>
@@ -28,6 +29,11 @@ Renderer::Renderer() {
     modelShaderProgram = createShaderProgram("shaders/modelVertexShader.glsl", "shaders/modelFragmentShader.glsl");
     if (shaderProgram == 0) {
         std::cerr << "Failed to create shader program" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    containerShaderProgram = createShaderProgram("shaders/containerVertexShader.glsl", "shaders/containerFragmentShader.glsl");
+    if (containerShaderProgram == 0) {
+        std::cerr << "Failed to create container shader program" << std::endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -87,11 +93,11 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Part
 
 void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& sphere, Mesh& mesh) {
     std::vector<glm::vec3> positions;
-    std::vector<float> scales;
+    std::vector<glm::vec3> scales;
 
     for (const auto& s : sphere) {
         positions.push_back(s->position);
-        scales.push_back(s->radius);
+        scales.push_back(glm::vec3(s->radius, s->radius, s->radius));
     }
 
     // Use the shader program
@@ -282,4 +288,17 @@ void Renderer::drawPlanes(const Camera& camera, const std::vector<std::shared_pt
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+}
+
+void Renderer::drawContainer(const Camera& camera, const std::vector<std::shared_ptr<CubeContainer>>& containers, Mesh& mesh) {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> scales;
+
+    for (const auto& container : containers) {
+        positions.push_back(container->position);
+        scales.push_back(container->size);
+    }
+
+    // Use the shader program
+    mesh.draw(containerShaderProgram, camera, positions, scales);
 }
