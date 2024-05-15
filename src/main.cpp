@@ -14,6 +14,7 @@
 
 #define TARGET_FPS 60
 #define NUM_SUBSTEPS 8
+#define ADD_PARTICLE_NUM 10
 
 using namespace std;
 
@@ -66,7 +67,7 @@ int main() {
     Renderer renderer;
 
     // load a model
-    Mesh mesh = Mesh("../models/sphere.obj", true, false);
+    Mesh mesh = Mesh("../models/sphere_ico_low.obj", true, false);
     // mesh.addPosition(glm::vec3(0.0f, 1.0f, 0.0f));
     
     // load the mesh for the container
@@ -91,19 +92,20 @@ int main() {
     Camera camera(cameraPosition, cameraDirection, cameraUp);
 
     // Add some spheres
-    sim.createSphere(glm::vec3(0.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    sim.createSphere(glm::vec3(0.6f, 2.5f, 0.0f), 0.55f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    // sim.createSphere(glm::vec3(0.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    // sim.createSphere(glm::vec3(0.6f, 2.5f, 0.0f), 0.55f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    // sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     // setting up the container
-    sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+    sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), true);
 
     while (!glfwWindowShouldClose(window)) {
 
         // if user press G, add a new sphere
         if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-            // sim.createSphere(glm::vec3((rand() / (float)RAND_MAX) * 9.0f - 4.5f, 5.0f, (rand() / (float)RAND_MAX) * 9.0f - 4.5f), 0.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-            sim.createSphere(glm::vec3((rand()/ (float)RAND_MAX * 1.0f - 0.5f), 1.0f, (rand() / (float)RAND_MAX) * 1.0f - 0.5f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+            for (int i = 0; i < ADD_PARTICLE_NUM; i++)
+                // sim.createSphere(glm::vec3((rand()/ (float)RAND_MAX * 1.0f - 0.5f), 1.0f, (rand() / (float)RAND_MAX) * 1.0f - 0.5f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+                sim.createSphere(glm::vec3((rand() / (float)RAND_MAX) * 9.0f - 4.5f, 2.0f, (rand() / (float)RAND_MAX) * 9.0f - 4.5f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
         }
 
         // if use press T, attract all the particles to the center and counteract gravity
@@ -123,7 +125,8 @@ int main() {
         // Update simulation
         float substep_dt = dt / NUM_SUBSTEPS;
         for (int j = 0; j < NUM_SUBSTEPS; j++) {
-            sim.checkCollisions();
+            // sim.checkCollisions();
+            sim.checkGridCollisions();
             sim.addForce(glm::vec3(0.0f, -10.0f, 0.0f));  // gravity
             sim.step(substep_dt);
         }
@@ -132,6 +135,7 @@ int main() {
         // Draw particles
         // convert the particles to spheres
         renderer.draw(camera, sim.spheres, mesh);
+        // renderer.draw(camera, sim.spheres); // using a more efficient shader that doesn't require a model
 
         // Draw the floor
         renderer.drawPlanes(camera, sim.planes);

@@ -2,9 +2,12 @@
 #include <omp.h>
 #include <iostream>
 #include "container.hpp"
+#include "grid.hpp"
 #ifndef _OPENMP
     #define _OPENMP 0
 #endif
+
+
 
 Simulation::Simulation() {
     // cout some info about omp version
@@ -12,6 +15,9 @@ Simulation::Simulation() {
     int num_threads = omp_get_max_threads();
     std::cout << "Number of OMP threads: " << num_threads << std::endl;
     omp_set_num_threads(num_threads);
+
+    // setup the grid
+    grid = std::make_unique<Grid>(0.30f); // here particle radius is 0.15
 }
 
 int Simulation::getNumParticles() {
@@ -25,25 +31,70 @@ void Simulation::step(float dt) {
 }
 
 void Simulation::checkCollisions() {
-    const int num_particles = static_cast<int>(particles.size());
-    #pragma omp parallel for
+    const int num_particles = static_cast<int>(spheres.size());
+    #pragma omp parallel for schedule(static, 1)
     for (int i = 0; i < num_particles; ++i) {
         // * collision with other particles
         for (size_t j = i + 1; j < num_particles; ++j) {
-            auto sphere = std::dynamic_pointer_cast<Sphere>(particles[j]);
-            if (sphere) {
-                particles[i]->collideWith(sphere);
-            }
+            spheres[i]->collideWith(spheres[j]);
         }
         // * collision with planes
-        for (auto& plane : planes) {
-            particles[i]->collideWith(plane);
-        }
+        // for (auto& plane : planes) {
+        //     particles[i]->collideWith(plane);
+        // }
         // * collision with containers
         for (auto& container : containers) {
             particles[i]->collideWith(container);
         }
     }
+}
+
+// ? method 1 : iterate over the particles
+// void Simulation::checkGridCollisions() {
+//     const int num_particles = (int)spheres.size();
+//     // clear the grid
+//     grid->clear();
+//     for (int i = 0; i < num_particles; ++i) {
+//         grid->insert(spheres[i]);
+//     }
+//         // check for collisions
+//         #pragma omp parallel for schedule(dynamic, 10)
+//         for (int i = 0; i < num_particles; ++i) {
+//             std::vector<std::shared_ptr<Sphere>> neighbors = grid->getNeighbors(spheres[i]);
+//             for (auto& neighbor : neighbors) {
+//                 spheres[i]->collideWith(neighbor);
+//             }
+//             for (auto& container : containers) {
+//                 particles[i]->collideWith(container);
+//             }
+//         }
+// }
+
+// ? method 2 : iterate over the grid
+void Simulation::checkGridCollisions() {
+    // clear the grid
+    grid->clear();
+    for (auto& s: spheres) {
+        grid->insert(s);
+    }
+    std::vector<std::pair<glm::ivec3, std::vector<std::shared_ptr<Sphere>>>> gridAsVector(grid->grid.begin(), grid->grid.end());
+    const int num_cells = static_cast<int>(gridAsVector.size());
+    #pragma omp parallel for schedule(static, 1)
+    for (int i = 0; i < num_cells; ++i) {
+        std::vector<std::shared_ptr<Sphere>> neighbors = grid->getNeighbors(gridAsVector[i].first);
+        for (auto& s : gridAsVector[i].second) {
+            for (auto& neighbor : neighbors) {
+                if (s != neighbor) {
+                    s->collideWith(neighbor);
+                }
+            }
+            for (auto& container : containers) {
+                s->collideWith(container);
+            }
+        }
+    }
+
+    
 }
 
 void Simulation::addForce(glm::vec3 force) {
@@ -64,7 +115,7 @@ void Simulation ::createSphere(glm::vec3 position, float radius, glm::vec3 veloc
     this->num_particles++;
 }
 
-void Simulation::createCubeContainer(glm::vec3 position, glm::vec3 size) {
-    auto cc = std::make_shared<CubeContainer>(position, size);
+void Simulation::createCubeContainer(glm::vec3 position, glm::vec3 size, bool fordedInside) {
+    auto cc = std::make_shared<CubeContainer>(position, size, fordedInside);
     containers.push_back(cc);
 }

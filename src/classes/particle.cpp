@@ -70,7 +70,7 @@ void Sphere::collideWith(std::shared_ptr<CubeContainer> container) {
     glm::vec3 min = container->getPosition() - size / 2.0f; // getting the minimum points of the container
     glm::vec3 max = container->getPosition() + size / 2.0f; // getting the maximum points of the container
     // Check if the sphere is inside the container
-    if (!(min.x <= position.x && position.x <= max.x && min.y <= position.y && position.y <= max.y && min.z <= position.z && position.z <= max.z)) {
+    if (!container->getForcedInside() && !(min.x <= position.x && position.x <= max.x && min.y <= position.y && position.y <= max.y && min.z <= position.z && position.z <= max.z)) {
         // the sphere is outside the container
         return;
     }

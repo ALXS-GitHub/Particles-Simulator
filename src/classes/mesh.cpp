@@ -35,34 +35,34 @@ void Mesh::setupMesh(bool instanced, bool single) {
 
     if (instanced) {
         if (!single) {
-        glGenBuffers(1, &VBOPosition);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
-        glBufferData(GL_ARRAY_BUFFER, 10000 * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-        glVertexAttribDivisor(3, 1);
+            glGenBuffers(1, &VBOPosition);
+            glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
+            glBufferData(GL_ARRAY_BUFFER, 30000 * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+            glVertexAttribDivisor(3, 1);
 
-        glGenBuffers(1, &VBOscale);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
-        glBufferData(GL_ARRAY_BUFFER, 10000 * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-        glVertexAttribDivisor(4, 1);
-        } else { // case when we draw a single mesh
-        glGenBuffers(1, &VBOPosition);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-        glVertexAttribDivisor(3, 1);
+            glGenBuffers(1, &VBOscale);
+            glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
+            glBufferData(GL_ARRAY_BUFFER, 30000 * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(4);
+            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+            glVertexAttribDivisor(4, 1);
+            } else { // case when we draw a single mesh
+            glGenBuffers(1, &VBOPosition);
+            glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+            glVertexAttribDivisor(3, 1);
 
-        glGenBuffers(1, &VBOscale);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-        glVertexAttribDivisor(4, 1);
-    }
+            glGenBuffers(1, &VBOscale);
+            glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(4);
+            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+            glVertexAttribDivisor(4, 1);
+        }
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -70,13 +70,14 @@ void Mesh::setupMesh(bool instanced, bool single) {
     glBindVertexArray(0);
 }
 
-void Mesh::draw(GLuint ShaderProgram, const Camera& camera, std::vector<glm::vec3> positions, std::vector<glm::vec3> scales) {
+void Mesh::draw(GLuint& ShaderProgram, const Camera& camera, std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales) {
     glUseProgram(ShaderProgram);
 
     glm::mat4 view = camera.getViewMatrix();
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);
 
-    glUniformMatrix4fv(glGetUniformLocation(ShaderProgram, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+    static GLint viewMatrixLocation = glGetUniformLocation(ShaderProgram, "viewMatrix");
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
     GLint projectionMatrixLocation = glGetUniformLocation(ShaderProgram, "projectionMatrix");
     glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 

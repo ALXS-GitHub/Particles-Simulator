@@ -13,6 +13,7 @@
 #include <vector>
 #include <memory>
 #include "mesh.hpp"
+#include <omp.h>
 
 Renderer::Renderer() {
     // Create a shader program
@@ -38,23 +39,13 @@ Renderer::Renderer() {
     }
 }
 
-void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Particle>>& particles) { // note : shared_ptr (*) meaning we take the pointer to the particle (and this allow polymorphism if we don't use the pointer we cannot use children classes) and the & meaning we take the reference to the particle
+void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& spheres) { // note : shared_ptr (*) meaning we take the pointer to the particle (and this allow polymorphism if we don't use the pointer we cannot use children classes) and the & meaning we take the reference to the particle
     std::vector<float> data;
-    for (const auto& particle : particles) {
-        std::shared_ptr<Sphere> sphere = std::dynamic_pointer_cast<Sphere>(particle); // dynamic_pointer_cast is used to convert the pointer to the base class to the pointer to the derived class
-        if (sphere) {
-            // If the particle is a sphere, add its position and radius to the data
-            data.push_back(sphere->position.x);
-            data.push_back(sphere->position.y);
-            data.push_back(sphere->position.z);
-            data.push_back(sphere->radius); // TODO fix this later to render the sphere properly
-        } else {
-            // If the particle is not a sphere, add its position to the data and use a default radius
-            data.push_back(particle->position.x);
-            data.push_back(particle->position.y);
-            data.push_back(particle->position.z);
-            data.push_back(0.0f);  // default radius for non-spheres
-        }
+    for (const auto& sphere : spheres) { 
+        data.push_back(sphere->position.x);
+        data.push_back(sphere->position.y);
+        data.push_back(sphere->position.z);
+        data.push_back(sphere->radius); // TODO fix this later to render the sphere properly
     }
 
     // Create a VBO and copy the data into it
@@ -82,7 +73,7 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Part
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(3 * sizeof(float)));
 
-    glDrawArrays(GL_POINTS, 0, particles.size());
+    glDrawArrays(GL_POINTS, 0, spheres.size());
 
     // Clean up
     glDisableVertexAttribArray(0);
@@ -91,13 +82,16 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Part
     glDeleteBuffers(1, &vbo);
 }
 
-void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& sphere, Mesh& mesh) {
+void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& spheres, Mesh& mesh) {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> scales;
 
-    for (const auto& s : sphere) {
-        positions.push_back(s->position);
-        scales.push_back(glm::vec3(s->radius, s->radius, s->radius));
+    positions.reserve(spheres.size());
+    scales.reserve(spheres.size());
+    
+    for (const auto& s : spheres) {
+        positions.emplace_back(s->position);
+        scales.emplace_back(glm::vec3(s->radius));
     }
 
     // Use the shader program
