@@ -8,6 +8,7 @@
 - Continue the README
 - Try to use CUDA for the particles simulation
 - Make some measurements to see the performance of the program with different parameters and methods
+- fix the scroll
 
 ## other
 

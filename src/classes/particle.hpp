@@ -12,6 +12,7 @@ class Sphere;
 
 class Particle {
 public:
+    int ID;
     vec3 previous_position;
     vec3 position;
     vec3 velocity;

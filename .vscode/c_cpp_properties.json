@@ -3,7 +3,8 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${MSMPI_INC}"
             ],
             "defines": [
                 "_DEBUG",

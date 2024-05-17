@@ -71,5 +71,6 @@
     },
     "cSpell.words": [
         "OPENMP"
-    ]
+    ],
+    "C_Cpp.errorSquiggles": "enabled",
 }

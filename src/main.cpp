@@ -6,19 +6,30 @@
 #include "classes/particle.hpp"
 #include "utils/texture_utils.hpp"
 #include "utils/camera_utils.hpp"
+#include "utils/mpi_manager.hpp"
 #include "dependencies/glew/glew.h"
 #include "classes/mesh.hpp"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
+#include <vector>
+#include <mpi.h>
 
 #define TARGET_FPS 60
-#define NUM_SUBSTEPS 8
+#define NUM_SUBSTEPS 1
 #define ADD_PARTICLE_NUM 10
 
 using namespace std;
 
+// uncomment the mpi related lines to enable mpi
+
 int main() {
+
+    // Initialize the MPI environment
+    MPIManager::Init();
+    if (MPIManager::getRank() == 0) 
+    { // $ get the whole main function in the mpi master
+
     cout << "Hello, World!" << endl;
     cout.flush();
     if (!glfwInit()) {
@@ -97,7 +108,7 @@ int main() {
     // sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     // setting up the container
-    sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), true);
+    sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(40.0f, 40.0f, 40.0f), true);
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -112,7 +123,7 @@ int main() {
         if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
             for (auto& p : sim.particles) {
                 p->addForce(glm::vec3(0.0f, 10.0f, 0.0f) * (float)NUM_SUBSTEPS); // not very accurate since the force is applied multiple times in the in the same frame (but it's good enough for this purpose)
-                p->addForce(-p->position * 30.0f);
+                p->addForce(-glm::normalize(p->position) * 50.0f * (float)NUM_SUBSTEPS);
             }
         }
 
@@ -126,7 +137,8 @@ int main() {
         float substep_dt = dt / NUM_SUBSTEPS;
         for (int j = 0; j < NUM_SUBSTEPS; j++) {
             // sim.checkCollisions();
-            sim.checkGridCollisions();
+            // sim.checkGridCollisions();
+            sim.checkGridCollisionsMPI();
             sim.addForce(glm::vec3(0.0f, -10.0f, 0.0f));  // gravity
             sim.step(substep_dt);
         }
@@ -167,5 +179,23 @@ int main() {
 
     glfwTerminate();
 
+    } // $ end of the master mpi process
+
+    else {
+        while (true)
+        {int recv_size;
+        MPI_Recv(&recv_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        vector<float> recv_data(recv_size);
+        MPI_Recv(recv_data.data(), recv_size, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        vector<float> container_data(6);
+        MPI_Recv(container_data.data(), 6, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        Simulation::checkGridCollisionsMPIProcess(recv_data, container_data);
+    
+        // send the data back to the master
+        // the size is the same as the received size
+        MPI_Send(recv_data.data(), recv_size, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);}
+    }
+
+    MPIManager::Finalize();
     return 0;
 }

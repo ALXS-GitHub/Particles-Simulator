@@ -11,6 +11,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 # If you're using CUDA
 # enable_language(CUDA)
 
+find_package(MPI REQUIRED)
+include_directories(${MPI_CXX_INCLUDE_PATH})
+
 # include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4/glfw-3.4/include) # msvc
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4.bin.WIN64/glfw-3.4.bin.WIN64/include) # g++
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glm)
@@ -33,12 +36,14 @@ add_executable(ParticlesSimulator
     src/classes/grid.cpp
     src/utils/camera_utils.cpp
     src/utils/texture_utils.cpp
+    src/utils/mpi_manager.cpp
     src/dependencies/glew/glew.c
 )
 # add_executable(ParticlesSimulator src/main.cpp src/classes/particle.cpp src/classes/simulation.cpp src/classes/renderer.cpp)
 
 add_definitions(-DGLEW_STATIC)
 
+target_link_libraries(ParticlesSimulator PRIVATE ${MPI_CXX_LIBRARIES})
 
 # link_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4/glfw-3.4/build/src/Debug)
 # find_library(GLFW_LIBRARY NAMES glfw3 PATHS ${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4/glfw-3.4/build/src/Debug) # msvc

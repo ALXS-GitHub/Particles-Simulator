@@ -24,9 +24,13 @@ public:
 
     int getNumParticles();
     void step(float dt);  // update simulation by time dt
-    void checkCollisions();  // check for collisions between particles and other elements // old method (doesn't use the grid)
-    void checkGridCollisions();  // check for collisions between particles and spheres
+    void checkCollisions();  // check for collisions between spheres and other elements // old method (doesn't use the grid)
+    void checkGridCollisions();  // check for collisions between  spheres
     void addForce(glm::vec3 force);  // add force to all particles
     void createSphere(glm::vec3 position, float radius, glm::vec3 velocity, glm::vec3 acceleration);  // add a sphere to the simulation
     void createCubeContainer(glm::vec3 position, glm::vec3 size, bool fordedInside = false);  // add a cube container to the simulation
+
+    // for later 
+    void checkGridCollisionsMPI();  // check for collisions between spheres using MPI
+    static void checkGridCollisionsMPIProcess(std::vector<float>& data, std::vector<float>& container_data);  // check for collisions between spheres using MPI
 };
