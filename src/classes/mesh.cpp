@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include "camera.hpp"
+#include "../config.hpp"
 
 Mesh::Mesh (const std::string& filename, bool instanced, bool single) {
     loadFromFile(filename);
@@ -37,14 +38,14 @@ void Mesh::setupMesh(bool instanced, bool single) {
         if (!single) {
             glGenBuffers(1, &VBOPosition);
             glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
-            glBufferData(GL_ARRAY_BUFFER, 30000 * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
             glEnableVertexAttribArray(3);
             glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
             glVertexAttribDivisor(3, 1);
 
             glGenBuffers(1, &VBOscale);
             glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
-            glBufferData(GL_ARRAY_BUFFER, 30000 * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
             glEnableVertexAttribArray(4);
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
             glVertexAttribDivisor(4, 1);

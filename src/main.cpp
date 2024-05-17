@@ -13,7 +13,7 @@
 #include <memory>
 
 #define TARGET_FPS 60
-#define NUM_SUBSTEPS 8
+#define NUM_SUBSTEPS 1
 #define ADD_PARTICLE_NUM 10
 
 using namespace std;
@@ -97,7 +97,7 @@ int main() {
     // sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     // setting up the container
-    sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), true);
+    sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(40.0f, 40.0f, 40.0f), true);
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -112,7 +112,7 @@ int main() {
         if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
             for (auto& p : sim.particles) {
                 p->addForce(glm::vec3(0.0f, 10.0f, 0.0f) * (float)NUM_SUBSTEPS); // not very accurate since the force is applied multiple times in the in the same frame (but it's good enough for this purpose)
-                p->addForce(-p->position * 30.0f);
+                p->addForce(-glm::normalize(p->position) * 50.0f * (float)NUM_SUBSTEPS);
             }
         }
 
