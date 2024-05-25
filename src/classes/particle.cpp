@@ -13,11 +13,19 @@ void Particle::addForce(vec3 force) {
 }
 
 void Particle::updatePosition(float dt) {
-    vec3 position_copy = position;
-    position += position - previous_position + acceleration * dt * dt;
-    previous_position = position_copy;
-    velocity = (position - previous_position) / dt; // for information only
-    acceleration = vec3(0.0f, 0.0f, 0.0f);
+    if (!fixed) {
+        vec3 position_copy = position;
+        position += position - previous_position + acceleration * dt * dt;
+        previous_position = position_copy;
+        velocity = (position - previous_position) / dt; // for information only
+        acceleration = vec3(0.0f, 0.0f, 0.0f);
+    }
+}
+
+void Particle::move(vec3 move) {
+    if (!fixed) {
+        position += move;
+    }
 }
 
 void Sphere::collideWith(std::shared_ptr<Sphere> sphere) {
@@ -27,8 +35,8 @@ void Sphere::collideWith(std::shared_ptr<Sphere> sphere) {
     if (overlap > 0) { // if there is a collision
         axis = glm::normalize(axis);
         glm::vec3 move = axis * overlap * 0.5f; // move the spheres by half the overlap
-        position += move;
-        sphere->position -= move;
+        this->move(move);
+        sphere->move(-move);
     }
 }
 

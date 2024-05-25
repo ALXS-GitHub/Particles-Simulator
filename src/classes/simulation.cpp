@@ -103,19 +103,31 @@ void Simulation::addForce(glm::vec3 force) {
     }
 }
 
-void Simulation ::createSphere(glm::vec3 position, float radius, glm::vec3 velocity, glm::vec3 acceleration) {
+std::shared_ptr<Sphere> Simulation ::createSphere(glm::vec3 position, float radius, glm::vec3 velocity, glm::vec3 acceleration, bool fixed) {
     auto p = std::make_shared<Sphere>();
     p->position = position;
     p->previous_position = position;
     p->velocity = velocity;
     p->acceleration = acceleration;
     p->radius = radius;
+    p->fixed = fixed;
     particles.push_back(p);
     spheres.push_back(p);
     this->num_particles++;
+    return p;
 }
 
 void Simulation::createCubeContainer(glm::vec3 position, glm::vec3 size, bool fordedInside) {
     auto cc = std::make_shared<CubeContainer>(position, size, fordedInside);
     containers.push_back(cc);
+}
+
+void Simulation::maintainMolecules() {
+    for (auto& m : molecules) {
+        if (m->linksEnabled) {
+            m->maintainDistanceLinks();
+        } else {
+            m->maintainDistanceAll();
+        }
+    }
 }

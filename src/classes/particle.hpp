@@ -16,7 +16,8 @@ public:
     vec3 position;
     vec3 velocity;
     vec3 acceleration;
-    // other properties...
+    
+    bool fixed = false; // whether the particle is fixed in space
 
     virtual ~Particle() = default;
     virtual void updatePosition(float dt);
@@ -24,6 +25,7 @@ public:
     virtual void collideWith(std::shared_ptr<Plane> plane) = 0;
     virtual void collideWith(std::shared_ptr<CubeContainer> container) = 0;
     void addForce(vec3 force);
+    void move(vec3 move); // move the particle by a certain amount
 };
 
 class Sphere : public Particle {

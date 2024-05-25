@@ -3,6 +3,7 @@
 #include "../utils/texture_utils.hpp"
 #include "plane.hpp"
 #include "camera.hpp"
+#include "molecule.hpp"
 #include "container.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include <glew.h>
@@ -37,6 +38,7 @@ Renderer::Renderer() {
         std::cerr << "Failed to create container shader program" << std::endl;
         exit(EXIT_FAILURE);
     }
+    moleculeLinksShaderProgram = createShaderProgram("shaders/modelOrientedVertexShader.glsl", "shaders/modelFragmentShader.glsl");
 }
 
 void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& spheres) { // note : shared_ptr (*) meaning we take the pointer to the particle (and this allow polymorphism if we don't use the pointer we cannot use children classes) and the & meaning we take the reference to the particle
@@ -254,6 +256,72 @@ GLuint Renderer::createShaderProgram(const std::string& vertexShaderFile, const 
     glDeleteShader(fragmentShader);
 
     return shaderProgram;
+}
+
+void Renderer::drawMoleculeLinks(const Camera& camera, const std::vector<std::shared_ptr<Molecule>>& molecules, Mesh& mesh) {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> scales;
+    std::vector<glm::vec3> rotations; // New vector for the rotation matrices
+
+    for (const auto& molecule : molecules) {
+        for (int i = 0; i < molecule->links.size(); i++) {
+            std::shared_ptr<Sphere> s1 = molecule->links[i].first;
+            std::shared_ptr<Sphere> s2 = molecule->links[i].second;
+            glm::vec3 center = (s1->position + s2->position) / 2.0f;
+            float distance = glm::length(s1->position - s2->position);
+            positions.push_back(center);
+            // scales.push_back(glm::vec3(s1->radius / 2, distance / 2, s1->radius / 2));
+            scales.push_back(glm::vec3(0.25f));
+
+            // Calculate the direction vector of the link
+            glm::vec3 axis = glm::normalize(s2->position - s1->position);
+            glm::vec3 modelUp = glm::vec3(0.0f, 1.0f, 0.0f);
+            glm::vec3 modelX = glm::vec3(1.0f, 0.0f, 0.0f);
+            glm::vec3 modelZ = glm::vec3(0.0f, 0.0f, 1.0f);
+
+            // get the dot product of the axis and modelUp vectors
+            float dotProduct = glm::dot(axis, modelUp);
+
+            // clamp the value to the range [-1.0, 1.0] to avoid precision issues
+            dotProduct = glm::clamp(dotProduct, -1.0f, 1.0f);
+
+            // get the angle between the up axis and the axis
+            float angleX = glm::degrees(acos(dotProduct));
+
+            // get the cross product of the axis and modelUp vectors
+            glm::vec3 crossProductX = glm::cross(axis, modelUp);
+
+            // adjust the sign of the angle based on the direction of the cross product
+            if (glm::dot(modelUp, crossProductX) < 0) {
+                angleX = -angleX;
+            }
+            
+            // get the projection of the axis on the xz plane
+            glm::vec3 axisXZ = glm::normalize(axis - glm::dot(axis, modelUp) * modelUp);
+
+            // get the cross product of the axisXZ and modelZ vectors
+            glm::vec3 crossProduct = glm::cross(axisXZ, modelZ);
+
+            // get the angle between the z axis and the projection of the axis on the xz plane
+            float angleY = glm::degrees(atan2(glm::length(crossProduct), glm::dot(axisXZ, modelZ)));
+
+            if (glm::dot(modelUp, crossProduct) < 0) {
+                angleY = -angleY;
+            }
+
+            angleY = angleY + 180.0f;
+
+            glm::vec3 rotation = glm::vec3(angleX, angleY, 0.0f);
+
+            std::cout << "Axis: " << axis.x << ", " << axis.y << ", " << axis.z << std::endl;
+            std::cout << "Rotation: " << rotation.x << ", " << rotation.y << ", " << rotation.z << std::endl;
+
+            rotations.push_back(rotation); // Add the rotation angles to the vector
+
+        }
+    }
+
+    mesh.drawOriented(moleculeLinksShaderProgram, camera, positions, scales, rotations); // Pass the rotation matrices to the draw function
 }
 
 void Renderer::drawPlanes(const Camera& camera, const std::vector<std::shared_ptr<Plane>>& planes) {

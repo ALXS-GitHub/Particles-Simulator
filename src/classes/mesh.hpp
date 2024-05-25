@@ -18,14 +18,15 @@ struct Vertex {
 
 class Mesh {
 public:
-    GLuint VAO, VBO, VBOPosition, VBOscale;
+    GLuint VAO, VBO, VBOPosition, VBOscale, VBOrot;
     std::vector<Vertex> vertices;
 
-    Mesh(const std::string &filename, bool instanced = false, bool single = false);
+    Mesh(const std::string &filename, bool instanced = false, bool single = false, bool oriented = false);
 
-    void setupMesh(bool instanced = false, bool single = false);
+    void setupMesh(bool instanced = false, bool single = false, bool oriented = false);
 
     void draw(GLuint& ShaderProgram, const Camera &camera, std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales);
+    void drawOriented(GLuint& ShaderProgram, const Camera &camera, std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales, std::vector<glm::vec3>& rotations);
 
 private:
     void loadFromFile(const std::string &filename);
