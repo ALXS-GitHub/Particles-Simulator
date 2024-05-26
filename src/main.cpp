@@ -101,24 +101,29 @@ int main() {
     // sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     // Add a molecule
-    shared_ptr<Molecule> molecule = make_shared<Molecule>(1.0f, false, 0.01f);
-    shared_ptr<Sphere> s1 = sim.createSphere(glm::vec3(0.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    shared_ptr<Sphere> s2 = sim.createSphere(glm::vec3(0.0f, 1.5f, 1.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    shared_ptr<Sphere> s3 = sim.createSphere(glm::vec3(1.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    shared_ptr<Sphere> s4 = sim.createSphere(glm::vec3(0.0f, 2.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    // shared_ptr<Sphere> s5 = sim.createSphere(glm::vec3(0.5f, 2.0f, 0.1f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    // shared_ptr<Molecule> molecule = make_shared<Molecule>(1.0f, true, 0.01f);
+    // shared_ptr<Sphere> s1 = sim.createSphere(glm::vec3(0.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    // shared_ptr<Sphere> s2 = sim.createSphere(glm::vec3(0.0f, 1.5f, 1.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    // shared_ptr<Sphere> s3 = sim.createSphere(glm::vec3(1.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    // shared_ptr<Sphere> s4 = sim.createSphere(glm::vec3(0.0f, 2.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    // // shared_ptr<Sphere> s5 = sim.createSphere(glm::vec3(0.5f, 2.0f, 0.1f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
-    molecule->addSphere(s1);
-    molecule->addSphere(s2);
-    molecule->addSphere(s3);
-    molecule->addSphere(s4);
-    // molecule->addSphere(s5);
+    // molecule->addSphere(s1);
+    // molecule->addSphere(s2);
+    // molecule->addSphere(s3);
+    // molecule->addSphere(s4);
+    // // molecule->addSphere(s5);
 
-    molecule->addLink(s1, s2);
-    molecule->addLink(s1, s3);
-    molecule->addLink(s1, s4);
+    // molecule->addLink(s1, s2);
+    // molecule->addLink(s1, s3);
+    // molecule->addLink(s1, s4);
+    // molecule->addLink(s2, s3);
+    // molecule->addLink(s2, s4);
+    // molecule->addLink(s3, s4);
 
-    sim.molecules.push_back(molecule);
+    // sim.molecules.push_back(molecule);
+
+    sim.loadMolecule("../data/cube.json");
 
     // setting up the container
     sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), true);
@@ -146,14 +151,17 @@ int main() {
         // Clear the screen and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Update simulation
-        float substep_dt = dt / NUM_SUBSTEPS;
-        for (int j = 0; j < NUM_SUBSTEPS; j++) {
-            // sim.checkCollisions();
-            sim.checkGridCollisions();
-            sim.maintainMolecules();
-            sim.addForce(glm::vec3(0.0f, -10.0f, 0.0f));  // gravity
-            sim.step(substep_dt);
+        // Check if 'p' key is pressed (pause the simulation)
+        if (glfwGetKey(window, GLFW_KEY_P) != GLFW_PRESS) {
+            // Update simulation
+            float substep_dt = dt / NUM_SUBSTEPS;
+            for (int j = 0; j < NUM_SUBSTEPS; j++) {
+                // sim.checkCollisions();
+                sim.checkGridCollisions();
+                sim.maintainMolecules();
+                sim.addForce(glm::vec3(0.0f, -10.0f, 0.0f));  // gravity
+                sim.step(substep_dt);
+            }
         }
 
 

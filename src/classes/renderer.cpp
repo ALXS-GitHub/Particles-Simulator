@@ -270,8 +270,8 @@ void Renderer::drawMoleculeLinks(const Camera& camera, const std::vector<std::sh
             glm::vec3 center = (s1->position + s2->position) / 2.0f;
             float distance = glm::length(s1->position - s2->position);
             positions.push_back(center);
-            // scales.push_back(glm::vec3(s1->radius / 2, distance / 2, s1->radius / 2));
-            scales.push_back(glm::vec3(0.25f));
+            scales.push_back(glm::vec3(s1->radius / 2, distance / 2, s1->radius / 2));
+            // scales.push_back(glm::vec3(0.25f));
 
             // Calculate the direction vector of the link
             glm::vec3 axis = glm::normalize(s2->position - s1->position);
@@ -312,10 +312,6 @@ void Renderer::drawMoleculeLinks(const Camera& camera, const std::vector<std::sh
             angleY = angleY + 180.0f;
 
             glm::vec3 rotation = glm::vec3(angleX, angleY, 0.0f);
-
-            std::cout << "Axis: " << axis.x << ", " << axis.y << ", " << axis.z << std::endl;
-            std::cout << "Rotation: " << rotation.x << ", " << rotation.y << ", " << rotation.z << std::endl;
-
             rotations.push_back(rotation); // Add the rotation angles to the vector
 
         }

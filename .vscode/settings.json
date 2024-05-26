@@ -67,7 +67,11 @@
         "memory_resource": "cpp",
         "numeric": "cpp",
         "random": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "forward_list": "cpp",
+        "any": "cpp",
+        "string_view": "cpp",
+        "valarray": "cpp"
     },
     "cSpell.words": [
         "OPENMP"

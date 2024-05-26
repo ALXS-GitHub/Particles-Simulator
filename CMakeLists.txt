@@ -16,6 +16,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glfw-3.4.bin.WIN64/gl
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glm)
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/glew)
 include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/stb)
+include_directories(${PROJECT_SOURCE_DIR}/src/dependencies/json)
 
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /O2 /Wall /W4 /openmp") # msvc
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3 -Wall -Wextra -fopenmp") # g++

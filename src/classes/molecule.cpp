@@ -4,10 +4,12 @@
 #include <vector>
 #include <memory>
 
-Molecule::Molecule(float distance, bool linksEnabled, float strength) {
+Molecule::Molecule(float distance, bool linksEnabled, float strength, float internalPressure, bool useInternalPressure) {
     this->distance = distance;
     this->linksEnabled = linksEnabled;
     this->strength = strength;
+    this->internalPressure = internalPressure;
+    this->useInternalPressure = useInternalPressure;
 }
 
 void Molecule::addSphere(std::shared_ptr<Sphere> sphere) {
@@ -59,4 +61,27 @@ void Molecule::maintainDistance(std::shared_ptr<Sphere> sphere1, std::shared_ptr
 
     // sphere1->addForce(force);
     // sphere2->addForce(-force);
+}
+
+void Molecule::addInternalPressure() {
+    // Calculate the center of the molecule
+    glm::vec3 center = glm::vec3(0.0f);
+    for (auto& sphere : spheres) {
+        center += sphere->position;
+    }
+    center /= spheres.size();
+
+    for (auto& sphere : spheres) {
+        glm::vec3 axis = sphere->position - center; // vector from the center to the sphere
+        float currentDistance = glm::length(axis); // current distance from the center
+
+        // Calculate the repulsion force
+        float repulsionForce = this->internalPressure * currentDistance;
+
+        // Calculate the correction vector
+        glm::vec3 correctionVector = glm::normalize(axis) * repulsionForce;
+
+        // Apply the correction
+        sphere->position += correctionVector;
+    }
 }

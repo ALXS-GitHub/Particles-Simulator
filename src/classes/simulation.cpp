@@ -3,11 +3,17 @@
 #include <iostream>
 #include "container.hpp"
 #include "grid.hpp"
+#include "particle.hpp"
+#include "molecule.hpp"
+#include <fstream>
+#include <json.hpp>
+#include <memory>
+#include <glm/glm.hpp>
 #ifndef _OPENMP
     #define _OPENMP 0
 #endif
 
-
+using json = nlohmann::json;
 
 Simulation::Simulation() {
     // cout some info about omp version
@@ -117,6 +123,51 @@ std::shared_ptr<Sphere> Simulation ::createSphere(glm::vec3 position, float radi
     return p;
 }
 
+std::shared_ptr<Molecule> Simulation::loadMolecule(std::string filename) {
+    std::ifstream file(filename);
+    json j;
+    file >> j;
+
+    // Create a new molecule
+    float internalPressure = 0.001f;
+    bool useInternalPressure = false;
+    if (j.find("internalPressure") != j.end()) {
+        internalPressure = j["internalPressure"];
+        useInternalPressure = true;
+    }
+    std::shared_ptr<Molecule> molecule = std::make_shared<Molecule>(j["distance"], j["linksEnabled"], j["strength"], internalPressure, useInternalPressure);
+
+    // Create a vector to store the spheres
+    std::vector<std::shared_ptr<Sphere>> spheres;
+
+    // Iterate over the spheres in the molecule
+    for (const auto& jSphere : j["spheres"]) {
+        // Create a new sphere
+        std::shared_ptr<Sphere> sphere = this->createSphere(
+            glm::vec3(jSphere["position"][0], jSphere["position"][1], jSphere["position"][2]),
+            jSphere["radius"],
+            // TODO manage the case where velocity and acceleration are not provided
+            glm::vec3(jSphere["velocity"][0], jSphere["velocity"][1], jSphere["velocity"][2]),
+            glm::vec3(jSphere["acceleration"][0], jSphere["acceleration"][1], jSphere["acceleration"][2])
+        );
+
+        // Add the sphere to the molecule and the spheres vector
+        molecule->addSphere(sphere);
+        spheres.push_back(sphere);
+    }
+
+    // Iterate over the links in the molecule
+    for (const auto& jLink : j["links"]) {
+        // Add a link between the spheres
+        molecule->addLink(spheres[jLink[0]], spheres[jLink[1]]);
+    }
+
+    // Add the molecule to the simulation
+    this->molecules.push_back(molecule);
+
+    return molecule;
+}
+
 void Simulation::createCubeContainer(glm::vec3 position, glm::vec3 size, bool fordedInside) {
     auto cc = std::make_shared<CubeContainer>(position, size, fordedInside);
     containers.push_back(cc);
@@ -128,6 +179,9 @@ void Simulation::maintainMolecules() {
             m->maintainDistanceLinks();
         } else {
             m->maintainDistanceAll();
+        }
+        if (m->useInternalPressure) {
+            m->addInternalPressure(); // TODO add a parameter to enable or disable this
         }
     }
 }
