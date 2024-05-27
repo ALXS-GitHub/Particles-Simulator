@@ -1,14 +1,11 @@
 # TODO
 
-
-- Try hybrid parallelism (OpenMP + MPI)
-- Try to make to imports more easy (with static files only)
+- Clear the code and make it well structured
 - Manage bounces on the walls (because for the moment they just stop)
-- Try to add a mass to the particles and change the collisions according to this
-- Continue the README
-- Try to use CUDA for the particles simulation
-- Make some measurements to see the performance of the program with different parameters and methods
-- Make an internal pressure for the molecules
+- Try to add a mass to the particles and change the collisions according to this + bounce on the walls
+- Continue the README (+ explain how to import libs)
+- Make a functionality to drag particles with the mouse (left click)
+- Check for collisions between molecules
 
 ## other
 

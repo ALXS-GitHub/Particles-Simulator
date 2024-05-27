@@ -305,6 +305,11 @@ void Renderer::drawMoleculeLinks(const Camera& camera, const std::vector<std::sh
             // get the angle between the z axis and the projection of the axis on the xz plane
             float angleY = glm::degrees(atan2(glm::length(crossProduct), glm::dot(axisXZ, modelZ)));
 
+            // check nan
+            if (isnan(angleY)) {
+                angleY = 0.0f;
+            }
+
             if (glm::dot(modelUp, crossProduct) < 0) {
                 angleY = -angleY;
             }

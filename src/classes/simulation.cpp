@@ -123,7 +123,7 @@ std::shared_ptr<Sphere> Simulation ::createSphere(glm::vec3 position, float radi
     return p;
 }
 
-std::shared_ptr<Molecule> Simulation::loadMolecule(std::string filename) {
+std::shared_ptr<Molecule> Simulation::loadMolecule(std::string filename, glm::vec3 offset) {
     std::ifstream file(filename);
     json j;
     file >> j;
@@ -142,13 +142,39 @@ std::shared_ptr<Molecule> Simulation::loadMolecule(std::string filename) {
 
     // Iterate over the spheres in the molecule
     for (const auto& jSphere : j["spheres"]) {
+
+        // init the parameters
+        glm::vec3 position;
+        float radius;
+        glm::vec3 velocity = glm::vec3(0.0f);
+        glm::vec3 acceleration = glm::vec3(0.0f);
+        bool fixed = false;
+
+        // check for optional parameters
+        if (jSphere.find("fixed") != jSphere.end()) {
+            fixed = jSphere["fixed"];
+        }
+
+        if (jSphere.find("velocity") != jSphere.end()) {
+            velocity = glm::vec3(jSphere["velocity"][0], jSphere["velocity"][1], jSphere["velocity"][2]);
+        }
+
+        if (jSphere.find("acceleration") != jSphere.end()) {
+            acceleration = glm::vec3(jSphere["acceleration"][0], jSphere["acceleration"][1], jSphere["acceleration"][2]);
+        }
+
+        // getting required parameters
+        position = glm::vec3(jSphere["position"][0], jSphere["position"][1], jSphere["position"][2]);
+        position += offset;
+        radius = jSphere["radius"];
+
         // Create a new sphere
         std::shared_ptr<Sphere> sphere = this->createSphere(
-            glm::vec3(jSphere["position"][0], jSphere["position"][1], jSphere["position"][2]),
-            jSphere["radius"],
-            // TODO manage the case where velocity and acceleration are not provided
-            glm::vec3(jSphere["velocity"][0], jSphere["velocity"][1], jSphere["velocity"][2]),
-            glm::vec3(jSphere["acceleration"][0], jSphere["acceleration"][1], jSphere["acceleration"][2])
+            position,
+            radius,
+            velocity,
+            acceleration,
+            fixed
         );
 
         // Add the sphere to the molecule and the spheres vector

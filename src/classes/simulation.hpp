@@ -30,7 +30,7 @@ public:
     void checkGridCollisions();  // check for collisions between particles and spheres
     void addForce(glm::vec3 force);  // add force to all particles
     std::shared_ptr<Sphere> createSphere(glm::vec3 position, float radius, glm::vec3 velocity, glm::vec3 acceleration, bool fixed = false);  // add a sphere to the simulation
-    std::shared_ptr<Molecule> loadMolecule(std::string filename);  // load a molecule from a json file
+    std::shared_ptr<Molecule> loadMolecule(std::string filename, glm::vec3 offset = glm::vec3(0.0f));  // load a molecule from a json file
     void createCubeContainer(glm::vec3 position, glm::vec3 size, bool fordedInside = false);  // add a cube container to the simulation
     void maintainMolecules();  // maintain the distance between the spheres in the molecules
 };

@@ -47,8 +47,8 @@ void Molecule::maintainDistance(std::shared_ptr<Sphere> sphere1, std::shared_ptr
     glm::vec3 correctionVector = axis * correctionDistance;
 
     // Apply the correction
-    sphere1->position -= correctionVector;
-    sphere2->position += correctionVector;
+    sphere1->move(-correctionVector);
+    sphere2->move(correctionVector);
 
     // * see the attractive version bellow
     // glm::vec3 axis = sphere1->position - sphere2->position; // vector between the two spheres
@@ -82,6 +82,6 @@ void Molecule::addInternalPressure() {
         glm::vec3 correctionVector = glm::normalize(axis) * repulsionForce;
 
         // Apply the correction
-        sphere->position += correctionVector;
+        sphere->move(correctionVector);
     }
 }

@@ -123,7 +123,8 @@ int main() {
 
     // sim.molecules.push_back(molecule);
 
-    sim.loadMolecule("../data/cube.json");
+    sim.loadMolecule("../data/icosphere.json");
+    sim.loadMolecule("../data/icosphere.json", glm::vec3(2.0f, 0.0f, 3.0f));
 
     // setting up the container
     sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), true);
