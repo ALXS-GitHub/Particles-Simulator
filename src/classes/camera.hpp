@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -13,6 +14,8 @@ public:
 
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix(float fov, float aspect, float near, float far) const;
+
+    void loadMatricesIntoShader(GLuint shaderProgram) const;
     
     void moveForward(float distance);
     void moveInDirection(float distance);

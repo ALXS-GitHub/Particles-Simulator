@@ -15,6 +15,15 @@ Mesh::Mesh (const std::string& filename, bool instanced, bool single, bool orien
     setupMesh(instanced, single, oriented);
 }
 
+void Mesh::createSubVBO(GLuint &VBO, GLuint attributeIndex, GLsizei size, GLint numPerVertex, GLsizei stride, const void* pointer, const void* offset, GLuint divisor) {
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, size, pointer, GL_STREAM_DRAW);
+    glEnableVertexAttribArray(attributeIndex);
+    glVertexAttribPointer(attributeIndex, numPerVertex, GL_FLOAT, GL_FALSE, stride, offset);
+    glVertexAttribDivisor(attributeIndex, divisor);
+}
+
 void Mesh::setupMesh(bool instanced, bool single, bool oriented) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -36,52 +45,23 @@ void Mesh::setupMesh(bool instanced, bool single, bool oriented) {
 
     if (instanced) {
         if (!single) {
-            glGenBuffers(1, &VBOPosition);
-            glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
-            glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-            glEnableVertexAttribArray(3);
-            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-            glVertexAttribDivisor(3, 1);
+            createSubVBO(VBOPosition, 3, MAX_PARTICLES * sizeof(glm::vec3), 3, sizeof(glm::vec3), NULL, (void*)0, 1);
 
-            glGenBuffers(1, &VBOscale);
-            glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
-            glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-            glEnableVertexAttribArray(4);
-            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-            glVertexAttribDivisor(4, 1);
+            createSubVBO(VBOscale, 4, MAX_PARTICLES * sizeof(glm::vec3), 3, sizeof(glm::vec3), NULL, (void*)0, 1);
 
             if (oriented) {
-                glGenBuffers(1, &VBOrot);
-                glBindBuffer(GL_ARRAY_BUFFER, VBOrot);
-                glBufferData(GL_ARRAY_BUFFER, MAX_LINKS * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-                glEnableVertexAttribArray(5);
-                glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-                glVertexAttribDivisor(5, 1);
+                createSubVBO(VBOrot, 5, MAX_PARTICLES * sizeof(glm::vec3), 3, sizeof(glm::vec3), NULL, (void*)0, 1);
             }
 
-            } else { // case when we draw a single mesh
-                glGenBuffers(1, &VBOPosition);
-                glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-                glEnableVertexAttribArray(3);
-                glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-                glVertexAttribDivisor(3, 1);
+        } else { // case when we draw a single mesh
 
-                glGenBuffers(1, &VBOscale);
-                glBindBuffer(GL_ARRAY_BUFFER, VBOscale);
-                glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-                glEnableVertexAttribArray(4);
-                glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-                glVertexAttribDivisor(4, 1);
+            createSubVBO(VBOPosition, 3, sizeof(glm::vec3), 3, sizeof(glm::vec3), NULL, (void*)0, 1);
 
-                if (oriented) {
-                    glGenBuffers(1, &VBOrot);
-                    glBindBuffer(GL_ARRAY_BUFFER, VBOrot);
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
-                    glEnableVertexAttribArray(5);
-                    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-                    glVertexAttribDivisor(5, 1);
-                }
+            createSubVBO(VBOscale, 4, sizeof(glm::vec3), 3, sizeof(glm::vec3), NULL, (void*)0, 1);
+
+            if (oriented) {
+                createSubVBO(VBOrot, 5, sizeof(glm::vec3), 3, sizeof(glm::vec3), NULL, (void*)0, 1);
+            }
         }
     }
 
@@ -93,13 +73,7 @@ void Mesh::setupMesh(bool instanced, bool single, bool oriented) {
 void Mesh::draw(GLuint& ShaderProgram, const Camera& camera, std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales) {
     glUseProgram(ShaderProgram);
 
-    glm::mat4 view = camera.getViewMatrix();
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);
-
-    static GLint viewMatrixLocation = glGetUniformLocation(ShaderProgram, "viewMatrix");
-    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
-    GLint projectionMatrixLocation = glGetUniformLocation(ShaderProgram, "projectionMatrix");
-    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    camera.loadMatricesIntoShader(ShaderProgram);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);
@@ -115,13 +89,7 @@ void Mesh::draw(GLuint& ShaderProgram, const Camera& camera, std::vector<glm::ve
 void Mesh::drawOriented(GLuint& ShaderProgram, const Camera &camera, std::vector<glm::vec3>& positions, std::vector<glm::vec3>& scales, std::vector<glm::vec3>& rotations) {
     glUseProgram(ShaderProgram);
 
-    glm::mat4 view = camera.getViewMatrix();
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);
-
-    static GLint viewMatrixLocation = glGetUniformLocation(ShaderProgram, "viewMatrix");
-    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
-    GLint projectionMatrixLocation = glGetUniformLocation(ShaderProgram, "projectionMatrix");
-    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    camera.loadMatricesIntoShader(ShaderProgram);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBOPosition);

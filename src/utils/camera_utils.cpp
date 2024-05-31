@@ -1,6 +1,8 @@
+#include <glew.h>
 #include "camera_utils.hpp"
 #include <GLFW/glfw3.h>
 #include "../classes/camera.hpp"
+#include <iostream>
 
 void handleCameraMotion(GLFWwindow* window, Camera& camera) {
 
@@ -30,7 +32,11 @@ void handleCameraMotion(GLFWwindow* window, Camera& camera) {
     // scroll control
     glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
         Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
-        camera->moveInDirection(static_cast<float>(yoffset) * 0.1f);
+        if (camera) {
+            camera->moveInDirection(static_cast<float>(yoffset) * 0.1f);
+        } else {
+            std::cerr << "Error: Camera pointer is null in scroll callback" << std::endl;
+        }
     });
 
     // key controls

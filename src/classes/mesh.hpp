@@ -30,4 +30,5 @@ public:
 
 private:
     void loadFromFile(const std::string &filename);
+    void createSubVBO(GLuint &VBO, GLuint attributeIndex, GLsizei size, GLint numPerVertex, GLsizei stride, const void* pointer, const void* offset, GLuint divisor);
 };

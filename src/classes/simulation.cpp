@@ -36,7 +36,7 @@ void Simulation::step(float dt) {
     }
 }
 
-void Simulation::checkCollisions() {
+void Simulation::checkCollisions() { // regular collision check without grid
     const int num_particles = static_cast<int>(spheres.size());
     #pragma omp parallel for schedule(static, 1)
     for (int i = 0; i < num_particles; ++i) {
@@ -99,13 +99,29 @@ void Simulation::checkGridCollisions() {
             }
         }
     }
-
-    
 }
 
 void Simulation::addForce(glm::vec3 force) {
     for (auto& p : particles) {
         p->addForce(force);
+    }
+}
+
+void Simulation::createCubeContainer(glm::vec3 position, glm::vec3 size, bool fordedInside) {
+    auto cc = std::make_shared<CubeContainer>(position, size, fordedInside);
+    containers.push_back(cc);
+}
+
+void Simulation::maintainMolecules() {
+    for (auto& m : molecules) {
+        if (m->linksEnabled) {
+            m->maintainDistanceLinks();
+        } else {
+            m->maintainDistanceAll();
+        }
+        if (m->useInternalPressure) {
+            m->addInternalPressure(); // TODO add a parameter to enable or disable this
+        }
     }
 }
 
@@ -192,22 +208,4 @@ std::shared_ptr<Molecule> Simulation::loadMolecule(std::string filename, glm::ve
     this->molecules.push_back(molecule);
 
     return molecule;
-}
-
-void Simulation::createCubeContainer(glm::vec3 position, glm::vec3 size, bool fordedInside) {
-    auto cc = std::make_shared<CubeContainer>(position, size, fordedInside);
-    containers.push_back(cc);
-}
-
-void Simulation::maintainMolecules() {
-    for (auto& m : molecules) {
-        if (m->linksEnabled) {
-            m->maintainDistanceLinks();
-        } else {
-            m->maintainDistanceAll();
-        }
-        if (m->useInternalPressure) {
-            m->addInternalPressure(); // TODO add a parameter to enable or disable this
-        }
-    }
 }

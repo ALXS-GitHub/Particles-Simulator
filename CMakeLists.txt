@@ -25,12 +25,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3 -Wall -Wextra -fopenmp") 
 add_executable(ParticlesSimulator 
     src/main.cpp 
     src/classes/particle.cpp 
+    src/classes/particles/sphere.cpp
     src/classes/simulation.cpp 
     src/classes/renderer.cpp 
     src/classes/camera.cpp 
     src/classes/plane.cpp
     src/classes/mesh.cpp
     src/classes/container.cpp
+    src/classes/containers/cubeContainer.cpp
     src/classes/grid.cpp
     src/classes/molecule.cpp
     src/utils/camera_utils.cpp

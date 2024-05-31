@@ -16,29 +16,32 @@
 #include "mesh.hpp"
 #include <omp.h>
 
+void checkError(GLuint shaderProgram, const std::string& type) {
+    if (shaderProgram == 0) {
+        std::cerr << "Failed to create shader program of type " << type << std::endl;
+        exit(EXIT_FAILURE);
+    }
+};
+
 Renderer::Renderer() {
+
+
+
     // Create a shader program
     shaderProgram = createShaderProgram("shaders/vertexShader.glsl", "shaders/geometryShader.glsl", "shaders/fragmentShader.glsl");
-    if (shaderProgram == 0) {
-        std::cerr << "Failed to create shader program" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    checkError(shaderProgram, "particle");
+
     floorShaderProgram = createShaderProgram("shaders/floorVertexShader.glsl", "shaders/floorFragmentShader.glsl");
-    if (floorShaderProgram == 0) {
-        std::cerr << "Failed to create floor shader program" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    checkError(floorShaderProgram, "floor");
+
     modelShaderProgram = createShaderProgram("shaders/modelVertexShader.glsl", "shaders/modelFragmentShader.glsl");
-    if (shaderProgram == 0) {
-        std::cerr << "Failed to create shader program" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    checkError(modelShaderProgram, "model");
+
     containerShaderProgram = createShaderProgram("shaders/containerVertexShader.glsl", "shaders/containerFragmentShader.glsl");
-    if (containerShaderProgram == 0) {
-        std::cerr << "Failed to create container shader program" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    checkError(containerShaderProgram, "container");
+
     moleculeLinksShaderProgram = createShaderProgram("shaders/modelOrientedVertexShader.glsl", "shaders/modelFragmentShader.glsl");
+    checkError(moleculeLinksShaderProgram, "moleculeLinks");
 }
 
 void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& spheres) { // note : shared_ptr (*) meaning we take the pointer to the particle (and this allow polymorphism if we don't use the pointer we cannot use children classes) and the & meaning we take the reference to the particle
@@ -59,15 +62,7 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphe
     // Use the shader program
     glUseProgram(shaderProgram);
 
-    // Set the view matrix uniform
-    glm::mat4 viewMatrix = camera.getViewMatrix();
-    GLint viewMatrixLocation = glGetUniformLocation(shaderProgram, "viewMatrix");
-    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-
-    // Set the projection matrix uniform
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);
-    GLint projectionMatrixLocation = glGetUniformLocation(shaderProgram, "projectionMatrix");
-    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    camera.loadMatricesIntoShader(shaderProgram);
 
     // Set up the vertex attribute pointers and draw the particles
     glEnableVertexAttribArray(0);
@@ -84,6 +79,86 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphe
     glDeleteBuffers(1, &vbo);
 }
 
+GLuint Renderer::loadAndCompileShader(const std::string& filename, GLenum shaderType) {
+    // Load the shader source
+    std::ifstream file("../" + filename);
+    if (!file) {
+        std::cerr << "Unable to open file " << filename << std::endl;
+        return 0;
+    }
+    std::stringstream fileStream;
+    fileStream << file.rdbuf();
+    std::string shaderSrc = fileStream.str();
+    const char* shaderSrcCStr = shaderSrc.c_str();
+
+    // Create the shader
+    GLuint shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, &shaderSrcCStr, nullptr);
+    glCompileShader(shader);
+
+    // Check for errors
+    GLint success;
+    GLchar infoLog[512];
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(shader, 512, NULL, infoLog);
+        std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
+        return 0;
+    }
+
+    return shader;
+}
+
+GLuint Renderer::createShaderProgram(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {
+    // Load the vertex shader
+    GLuint vertexShader = loadAndCompileShader(vertexShaderFile, GL_VERTEX_SHADER);
+    checkError(vertexShader, "vertex");
+
+    // Load the fragment shader
+    GLuint fragmentShader = loadAndCompileShader(fragmentShaderFile, GL_FRAGMENT_SHADER);
+    checkError(fragmentShader, "fragment");
+
+    // Create the shader program
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    // Clean up
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgram;
+}
+
+GLuint Renderer::createShaderProgram(const std::string& vertexShaderFile, const std::string& geometryShaderFile, const std::string& fragmentShaderFile) {
+    // Load the vertex shader
+    GLuint vertexShader = loadAndCompileShader(vertexShaderFile, GL_VERTEX_SHADER);
+    checkError(vertexShader, "vertex");
+
+    // Load the geometry shader
+    GLuint geometryShader = loadAndCompileShader(geometryShaderFile, GL_GEOMETRY_SHADER);
+    checkError(geometryShader, "geometry");
+
+    // Load the fragment shader
+    GLuint fragmentShader = loadAndCompileShader(fragmentShaderFile, GL_FRAGMENT_SHADER);
+    checkError(fragmentShader, "fragment");
+
+    // Create the shader program
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, geometryShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    // Clean up
+    glDeleteShader(vertexShader);
+    glDeleteShader(geometryShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgram;
+}
+
 void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& spheres, Mesh& mesh) {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> scales;
@@ -98,164 +173,6 @@ void Renderer::draw(const Camera& camera, const std::vector<std::shared_ptr<Sphe
 
     // Use the shader program
     mesh.draw(modelShaderProgram, camera, positions, scales);
-}
-
-GLuint Renderer::createShaderProgram(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {
-    // Load the vertex shader
-    std::ifstream vShaderFile("../" + vertexShaderFile);
-    if (!vShaderFile) {
-        std::cerr << "Unable to open file " << vertexShaderFile << std::endl;
-        return 0;
-    }
-    std::stringstream vShaderStream;
-    vShaderStream << vShaderFile.rdbuf();
-    std::string vShaderStr = vShaderStream.str();
-    const char* vShaderSrc = vShaderStr.c_str();
-
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vShaderSrc, nullptr);
-    glCompileShader(vertexShader);
-
-    GLint success;
-    GLchar infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-        return 0;
-    }
-
-    // Load the fragment shader
-    std::ifstream fShaderFile("../" + fragmentShaderFile);
-    if (!fShaderFile) {
-        std::cerr << "Unable to open file " << fragmentShaderFile << std::endl;
-        return 0;
-    }
-    std::stringstream fShaderStream;
-    fShaderStream << fShaderFile.rdbuf();
-    std::string fShaderStr = fShaderStream.str();
-    const char* fShaderSrc = fShaderStr.c_str();
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fShaderSrc, nullptr);
-    glCompileShader(fragmentShader);
-
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-        return 0;
-    }
-
-    // Create the shader program
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-        return 0;
-    }
-
-    // Clean up
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return shaderProgram;
-}
-
-GLuint Renderer::createShaderProgram(const std::string& vertexShaderFile, const std::string& geometryShaderFile, const std::string& fragmentShaderFile) {
-    // Load the vertex shader
-    std::ifstream vShaderFile("../" + vertexShaderFile);
-    if (!vShaderFile) {
-        std::cerr << "Unable to open file " << vertexShaderFile << std::endl;
-        return 0;
-    }
-    std::stringstream vShaderStream;
-    vShaderStream << vShaderFile.rdbuf();
-    std::string vShaderStr = vShaderStream.str();
-    const char* vShaderSrc = vShaderStr.c_str();
-
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vShaderSrc, nullptr);
-    glCompileShader(vertexShader);
-
-    GLint success;
-    GLchar infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-        return 0;
-    }
-
-    // Load the geometry shader
-    std::ifstream gShaderFile("../" + geometryShaderFile);
-    if (!gShaderFile) {
-        std::cerr << "Unable to open file " << geometryShaderFile << std::endl;
-        return 0;
-    }
-    std::stringstream gShaderStream;
-    gShaderStream << gShaderFile.rdbuf();
-    std::string gShaderStr = gShaderStream.str();
-    const char* gShaderSrc = gShaderStr.c_str();
-
-    GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-    glShaderSource(geometryShader, 1, &gShaderSrc, nullptr);
-    glCompileShader(geometryShader);
-
-    glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
-        return 0;
-    }
-
-    // Load the fragment shader
-    std::ifstream fShaderFile("../" + fragmentShaderFile);
-    if (!fShaderFile) {
-        std::cerr << "Unable to open file " << fragmentShaderFile << std::endl;
-        return 0;
-    }
-    std::stringstream fShaderStream;
-    fShaderStream << fShaderFile.rdbuf();
-    std::string fShaderStr = fShaderStream.str();
-    const char* fShaderSrc = fShaderStr.c_str();
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fShaderSrc, nullptr);
-    glCompileShader(fragmentShader);
-
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-        return 0;
-    }
-
-    // Create the shader program
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, geometryShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-        return 0;
-    }
-
-    // Clean up
-    glDeleteShader(vertexShader);
-    glDeleteShader(geometryShader);
-    glDeleteShader(fragmentShader);
-
-    return shaderProgram;
 }
 
 void Renderer::drawMoleculeLinks(const Camera& camera, const std::vector<std::shared_ptr<Molecule>>& molecules, Mesh& mesh) {
@@ -329,11 +246,7 @@ void Renderer::drawPlanes(const Camera& camera, const std::vector<std::shared_pt
     // Use the shader program
     glUseProgram(floorShaderProgram);
 
-    // Set the view and projection matrix uniforms
-    glm::mat4 viewMatrix = camera.getViewMatrix();
-    glUniformMatrix4fv(glGetUniformLocation(floorShaderProgram, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 800.0f, 0.1f, 100.0f);
-    glUniformMatrix4fv(glGetUniformLocation(floorShaderProgram, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+   camera.loadMatricesIntoShader(floorShaderProgram);
 
     for (const auto& plane : planes) {
         // Bind the floor texture

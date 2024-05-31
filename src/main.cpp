@@ -1,7 +1,7 @@
 // main.cpp
+#include "classes/camera.hpp"
 #include "classes/simulation.hpp"
 #include "classes/renderer.hpp"
-#include "classes/camera.hpp"
 #include "classes/plane.hpp"
 #include "classes/particle.hpp"
 #include "classes/molecule.hpp"
@@ -94,34 +94,12 @@ int main() {
     glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, -1.0f);  // looking towards the negative z-axis
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // y-axis is up
     Camera camera(cameraPosition, cameraDirection, cameraUp);
+    glfwSetWindowUserPointer(window, &camera);
 
     // Add some spheres
     // sim.createSphere(glm::vec3(0.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), true);
     // sim.createSphere(glm::vec3(0.6f, 2.5f, 0.0f), 0.55f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
     // sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-
-    // Add a molecule
-    // shared_ptr<Molecule> molecule = make_shared<Molecule>(1.0f, true, 0.01f);
-    // shared_ptr<Sphere> s1 = sim.createSphere(glm::vec3(0.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    // shared_ptr<Sphere> s2 = sim.createSphere(glm::vec3(0.0f, 1.5f, 1.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    // shared_ptr<Sphere> s3 = sim.createSphere(glm::vec3(1.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    // shared_ptr<Sphere> s4 = sim.createSphere(glm::vec3(0.0f, 2.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-    // // shared_ptr<Sphere> s5 = sim.createSphere(glm::vec3(0.5f, 2.0f, 0.1f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-
-    // molecule->addSphere(s1);
-    // molecule->addSphere(s2);
-    // molecule->addSphere(s3);
-    // molecule->addSphere(s4);
-    // // molecule->addSphere(s5);
-
-    // molecule->addLink(s1, s2);
-    // molecule->addLink(s1, s3);
-    // molecule->addLink(s1, s4);
-    // molecule->addLink(s2, s3);
-    // molecule->addLink(s2, s4);
-    // molecule->addLink(s3, s4);
-
-    // sim.molecules.push_back(molecule);
 
     sim.loadMolecule("../data/icosphere.json");
     sim.loadMolecule("../data/icosphere.json", glm::vec3(2.0f, 0.0f, 3.0f));

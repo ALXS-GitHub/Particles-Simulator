@@ -5,6 +5,7 @@
 #include "container.hpp"
 #include <memory>
 
+
 using namespace glm;
 
 class Particle;
@@ -28,13 +29,7 @@ public:
     void move(vec3 move); // move the particle by a certain amount
 };
 
-class Sphere : public Particle {
-public:
-    float radius;
-    // other properties...
-    void collideWith(std::shared_ptr<Sphere> sphere) override;
-    void collideWith(std::shared_ptr<Plane> plane) override;
-    void collideWith(std::shared_ptr<CubeContainer> container) override;
-};
+// particle classes
+#include "particles/sphere.hpp"
 
 // Path: src/classes/particle.hpp

@@ -1,6 +1,5 @@
 # TODO
 
-- Clear the code and make it well structured
 - Manage bounces on the walls (because for the moment they just stop)
 - Try to add a mass to the particles and change the collisions according to this + bounce on the walls
 - Continue the README (+ explain how to import libs)

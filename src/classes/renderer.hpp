@@ -25,6 +25,8 @@ private:
     GLuint containerShaderProgram;
     GLuint moleculeLinksShaderProgram;
 
+    GLuint loadAndCompileShader(const std::string& filename, GLenum shaderType);
+
 public:
     Renderer();
     void draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& spheres);

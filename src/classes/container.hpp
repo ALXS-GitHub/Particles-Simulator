@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 
+
 class Container {
     private:
         bool forcedInside; // this is used to force the particles inside the container, mainly if the dt in the simulation is high (or not many substeps), but be careful with this, it can lead to some weird behavior if you have multiple containers
@@ -17,11 +18,5 @@ class Container {
         bool getForcedInside();
 };
 
-class CubeContainer : public Container {
-    public:
-        glm::vec3 size; // length, width, height
-
-        CubeContainer(glm::vec3 position, glm::vec3 size, bool forcedInside = false);
-        glm::vec3 getSize();
-        void setSize(glm::vec3 size);
-};
+// container classes
+#include "./containers/cubeContainer.hpp"

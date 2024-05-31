@@ -1,6 +1,10 @@
+#include <glew.h>
 #include "camera.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "../config.hpp"
+#include <glm/gtc/type_ptr.hpp>
+#include <cmath>
 
 Camera::Camera(glm::vec3 position, glm::vec3 direction, glm::vec3 up)
     : position(position), direction(direction), up(up) {}
@@ -11,6 +15,17 @@ glm::mat4 Camera::getViewMatrix() const {
 
 glm::mat4 Camera::getProjectionMatrix(float fov, float aspect, float near, float far) const {
     return glm::perspective(fov, aspect, near, far);
+}
+
+void Camera::loadMatricesIntoShader(GLuint shaderProgram) const {
+    glm::mat4 viewMatrix = getViewMatrix();
+    glm::mat4 projectionMatrix = getProjectionMatrix(CAMERA_FOV, CAMERA_ASPECT_RATIO, CAMERA_NEAR, CAMERA_FAR);
+
+    GLint viewMatrixLocation = glGetUniformLocation(shaderProgram, "viewMatrix");
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+    GLint projectionMatrixLocation = glGetUniformLocation(shaderProgram, "projectionMatrix");
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 }
 
 void Camera::moveForward(float distance) {
@@ -75,7 +90,7 @@ void Camera::rotateVertical(float angle) {
     glm::vec3 newDirection = glm::normalize(glm::rotate(glm::mat4(1.0f), glm::radians(angle), right) * glm::vec4(direction, 0.0f));
 
     // Check if the new direction is too close to being straight up or straight down
-    if (abs(glm::dot(newDirection, up)) < 0.95f) {
+    if (std::abs(glm::dot(newDirection, up)) < 0.95f) {
         direction = newDirection;
     }
 }
