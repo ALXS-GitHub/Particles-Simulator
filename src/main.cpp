@@ -7,6 +7,7 @@
 #include "classes/molecule.hpp"
 #include "utils/texture_utils.hpp"
 #include "utils/camera_utils.hpp"
+#include "utils/drag_particles.hpp"
 #include "dependencies/glew/glew.h"
 #include "classes/mesh.hpp"
 #include <GLFW/glfw3.h>
@@ -95,14 +96,16 @@ int main() {
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // y-axis is up
     Camera camera(cameraPosition, cameraDirection, cameraUp);
     glfwSetWindowUserPointer(window, &camera);
+    DragParticles dragParticles(window);
 
     // Add some spheres
     // sim.createSphere(glm::vec3(0.0f, 1.5f, 0.0f), 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), true);
     // sim.createSphere(glm::vec3(0.6f, 2.5f, 0.0f), 0.55f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
     // sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
-    sim.loadMolecule("../data/icosphere.json");
-    sim.loadMolecule("../data/icosphere.json", glm::vec3(2.0f, 0.0f, 3.0f));
+    sim.loadMolecule("../data/fixed_rope.json");
+    // sim.loadMolecule("../data/icosphere.json");
+    // sim.loadMolecule("../data/icosphere.json", glm::vec3(2.0f, 0.0f, 3.0f));
 
     // setting up the container
     sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), true);
@@ -126,6 +129,9 @@ int main() {
 
         // Handle camera motion
         handleCameraMotion(window, camera);
+
+        // Handle particle dragging
+        dragParticles.handleDrag(camera, sim);
 
         // Clear the screen and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

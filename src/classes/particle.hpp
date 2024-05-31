@@ -12,6 +12,8 @@ class Particle;
 class Sphere;
 
 class Particle {
+    bool updatingEnabled = true;
+
 public:
     vec3 previous_position;
     vec3 position;
@@ -27,6 +29,7 @@ public:
     virtual void collideWith(std::shared_ptr<CubeContainer> container) = 0;
     void addForce(vec3 force);
     void move(vec3 move); // move the particle by a certain amount
+    void setUpdatingEnabled(bool enabled);
 };
 
 // particle classes

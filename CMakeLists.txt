@@ -37,6 +37,8 @@ add_executable(ParticlesSimulator
     src/classes/molecule.cpp
     src/utils/camera_utils.cpp
     src/utils/texture_utils.cpp
+    src/utils/drag_particles.cpp
+    src/utils/ray.cpp
     src/dependencies/glew/glew.c
 )
 # add_executable(ParticlesSimulator src/main.cpp src/classes/particle.cpp src/classes/simulation.cpp src/classes/renderer.cpp)
