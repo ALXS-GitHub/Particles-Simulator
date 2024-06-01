@@ -266,7 +266,7 @@ void Renderer::drawPlanes(const Camera& camera, const std::vector<std::shared_pt
     }
 }
 
-void Renderer::drawContainer(const Camera& camera, const std::vector<std::shared_ptr<CubeContainer>>& containers, Mesh& mesh) {
+void Renderer::drawContainer(const Camera& camera, const std::vector<std::shared_ptr<Container>>& containers, Mesh& mesh) {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> scales;
 

@@ -33,6 +33,7 @@ add_executable(ParticlesSimulator
     src/classes/mesh.cpp
     src/classes/container.cpp
     src/classes/containers/cubeContainer.cpp
+    src/classes/containers/sphereContainer.cpp
     src/classes/grid.cpp
     src/classes/molecule.cpp
     src/utils/camera_utils.cpp

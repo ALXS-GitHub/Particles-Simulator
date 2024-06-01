@@ -73,7 +73,8 @@ int main() {
     // mesh.addPosition(glm::vec3(0.0f, 1.0f, 0.0f));
     
     // load the mesh for the container
-    Mesh containerMesh = Mesh("../models/cube.obj", true, true);
+    // Mesh containerMesh = Mesh("../models/cube.obj", true, true);
+    Mesh containerMesh = Mesh("../models/sphere.obj", true, true);
 
     // load the particles link mesh
     Mesh linkMesh = Mesh("../models/cylinder.obj", true, false, true);
@@ -103,12 +104,13 @@ int main() {
     // sim.createSphere(glm::vec3(0.6f, 2.5f, 0.0f), 0.55f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
     // sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
-    sim.loadMolecule("../data/fixed_rope.json");
-    // sim.loadMolecule("../data/icosphere.json");
-    // sim.loadMolecule("../data/icosphere.json", glm::vec3(2.0f, 0.0f, 3.0f));
+    // sim.loadMolecule("../data/fixed_rope.json");
+    sim.loadMolecule("../data/icosphere.json");
+    sim.loadMolecule("../data/icosphere.json", glm::vec3(2.0f, 0.0f, 3.0f));
 
     // setting up the container
-    sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), true);
+    // sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), true);
+    sim.createSphereContainer(glm::vec3(0.0f, 0.0f, 0.0f), 5.0f, true);
 
     while (!glfwWindowShouldClose(window)) {
 

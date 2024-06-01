@@ -45,35 +45,6 @@ void Sphere::collideWith(std::shared_ptr<Plane> plane) {
     }
 }
 
-void Sphere::collideWith(std::shared_ptr<CubeContainer> container) {
-    // Collision resolution code
-    glm::vec3 size = container->getSize();
-    glm::vec3 min = container->getPosition() - size / 2.0f; // getting the minimum points of the container
-    glm::vec3 max = container->getPosition() + size / 2.0f; // getting the maximum points of the container
-    // Check if the sphere is inside the container
-    if (!container->getForcedInside() && !(min.x <= position.x && position.x <= max.x && min.y <= position.y && position.y <= max.y && min.z <= position.z && position.z <= max.z)) {
-        // the sphere is outside the container
-        return;
-    }
-
-    // Collision resolution code
-    if (position.x - radius < min.x) {
-        position.x = min.x + radius;
-    } 
-    if (position.x + radius > max.x) {
-        position.x = max.x - radius;
-    }
-    if (position.y - radius < min.y) {
-        position.y = min.y + radius;
-    }
-    if (position.y + radius > max.y) {
-        position.y = max.y - radius;
-    }
-    if (position.z - radius < min.z) {
-        position.z = min.z + radius;
-    }
-    if (position.z + radius > max.z) {
-        position.z = max.z - radius;
-    }
-
+void Sphere::collideWith(std::shared_ptr<Container> container) {
+    container->collideWith(this);
 }

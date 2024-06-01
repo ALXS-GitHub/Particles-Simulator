@@ -112,6 +112,12 @@ void Simulation::createCubeContainer(glm::vec3 position, glm::vec3 size, bool fo
     containers.push_back(cc);
 }
 
+void Simulation::createSphereContainer(glm::vec3 position, float radius, bool fordedInside) {
+    glm::vec3 size = glm::vec3(radius * 2.0f);
+    auto sc = std::make_shared<SphereContainer>(position, size, fordedInside);
+    containers.push_back(sc);
+}
+
 void Simulation::maintainMolecules() {
     for (auto& m : molecules) {
         if (m->linksEnabled) {

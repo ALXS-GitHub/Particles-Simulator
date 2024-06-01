@@ -33,7 +33,7 @@ public:
     void draw(const Camera& camera, const std::vector<std::shared_ptr<Sphere>>& spheres, Mesh& mesh);
     void drawMoleculeLinks(const Camera& camera, const std::vector<std::shared_ptr<Molecule>>& molecules, Mesh& mesh);
     void drawPlanes(const Camera& camera, const std::vector<std::shared_ptr<Plane>>& planes);
-    void drawContainer(const Camera& camera, const std::vector<std::shared_ptr<CubeContainer>>& containers, Mesh& mesh);
+    void drawContainer(const Camera& camera, const std::vector<std::shared_ptr<Container>>& containers, Mesh& mesh);
     GLuint createShaderProgram(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
     GLuint createShaderProgram(const std::string& vertexShaderFile, const std::string& geometryShaderFile, const std::string& fragmentShaderFile);
 };

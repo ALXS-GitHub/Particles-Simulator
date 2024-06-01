@@ -8,8 +8,10 @@
 
 using namespace glm;
 
+// ? forward declarations
 class Particle;
 class Sphere;
+class Container;
 
 class Particle {
     bool updatingEnabled = true;
@@ -26,7 +28,7 @@ public:
     virtual void updatePosition(float dt);
     virtual void collideWith(std::shared_ptr<Sphere> sphere) = 0;
     virtual void collideWith(std::shared_ptr<Plane> plane) = 0;
-    virtual void collideWith(std::shared_ptr<CubeContainer> container) = 0;
+    virtual void collideWith(std::shared_ptr<Container> container) = 0;
     void addForce(vec3 force);
     void move(vec3 move); // move the particle by a certain amount
     void setUpdatingEnabled(bool enabled);
