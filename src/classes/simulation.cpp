@@ -9,6 +9,8 @@
 #include <json.hpp>
 #include <memory>
 #include <glm/glm.hpp>
+#include "../utils/parser.hpp"
+#include "../config.hpp"
 #ifndef _OPENMP
     #define _OPENMP 0
 #endif
@@ -23,7 +25,7 @@ Simulation::Simulation() {
     omp_set_num_threads(num_threads);
 
     // setup the grid
-    grid = std::make_unique<Grid>(0.30f); // here particle radius is 0.15
+    grid = std::make_unique<Grid>(MAX_PARTICLE_RADIUS * 2.0f); // the grid cell size is 2 times the max particle radius
 }
 
 int Simulation::getNumParticles() {
@@ -131,6 +133,14 @@ void Simulation::maintainMolecules() {
     }
 }
 
+std::shared_ptr<Sphere> Simulation::createSphere(std::shared_ptr<Sphere> sphere) {
+    particles.push_back(sphere);
+    spheres.push_back(sphere);
+    this->num_particles++;
+
+    return sphere;
+}
+
 std::shared_ptr<Sphere> Simulation ::createSphere(glm::vec3 position, float radius, glm::vec3 velocity, glm::vec3 acceleration, bool fixed) {
     auto p = std::make_shared<Sphere>();
     p->position = position;
@@ -214,4 +224,44 @@ std::shared_ptr<Molecule> Simulation::loadMolecule(std::string filename, glm::ve
     this->molecules.push_back(molecule);
 
     return molecule;
+}
+
+void Simulation::loadWorld(std::string filename) {
+    std::ifstream
+    file(filename);
+    json j;
+
+    file >> j;
+
+    // Load the containers
+    for (const auto& jContainer : j["containers"]) {
+        std::shared_ptr<Container> container = parseContainer(jContainer);
+        if (container != nullptr) {
+            this->containers.push_back(container);
+            if (std::dynamic_pointer_cast<CubeContainer>(container) != nullptr) {
+                this->cubeContainers.push_back(std::dynamic_pointer_cast<CubeContainer>(container));
+            } else if (std::dynamic_pointer_cast<SphereContainer>(container) != nullptr) {
+                this->sphereContainers.push_back(std::dynamic_pointer_cast<SphereContainer>(container));
+            }
+        }
+    }
+
+    // Load the spheres
+    for (const auto& jSphere : j["spheres"]) {
+        std::shared_ptr<Sphere> sphere = parseSphere(jSphere);
+        if (sphere != nullptr) {
+            this->createSphere(sphere);
+        }
+    }
+
+    // Load the molecules
+    for (const auto& jMolecule : j["molecules"]) {
+        std::shared_ptr<Molecule> molecule = parseMolecule(jMolecule);
+        if (molecule != nullptr) {
+            for (auto& s : molecule->spheres) {
+                this->createSphere(s);
+            }
+            this->molecules.push_back(molecule);
+        }
+    }
 }

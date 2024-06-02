@@ -1,0 +1,28 @@
+{
+    "containers": [
+        {
+            "type": "cube",
+            "position": [0, 0, 0],
+            "size": [10, 10, 10],
+            "forcedInside": true
+        }
+    ],
+    "spheres": [
+        {
+            "position": [2, 0, 0],
+            "radius": 0.15,
+            "velocity": [0, 0, 0],
+            "acceleration": [0, 0, 0],
+            "fixed": false
+        },
+        {
+            "position": [-2, 0, 0],
+            "radius": 0.15,
+            "velocity": [0, 0, 0],
+            "acceleration": [0, 0, 0],
+            "fixed": false
+        }
+    ],
+    "molecules": [
+    ]
+}

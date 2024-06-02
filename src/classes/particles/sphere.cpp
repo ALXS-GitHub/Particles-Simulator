@@ -1,6 +1,15 @@
 #include "sphere.hpp"
 #include <glm/glm.hpp>
 
+Sphere::Sphere(glm::vec3 position, float radius, glm::vec3 velocity, glm::vec3 acceleration, bool fixed) {
+    this->position = position;
+    this->previous_position = position;
+    this->radius = radius;
+    this->velocity = velocity;
+    this->acceleration = acceleration;
+    this->fixed = fixed;
+}
+
 void Sphere::collideWith(std::shared_ptr<Sphere> sphere) {
     glm::vec3 axis = position - sphere->position; // vector between the two spheres
     float distance = glm::length(axis); // distance between the two spheres

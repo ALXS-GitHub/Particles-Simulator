@@ -10,6 +10,7 @@
 #include "utils/drag_particles.hpp"
 #include "dependencies/glew/glew.h"
 #include "classes/mesh.hpp"
+#include "cmd.hpp"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <memory>
@@ -20,9 +21,12 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
     cout << "Hello, World!" << endl;
     cout.flush();
+
+    // ? setup
+
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         return -1;
@@ -73,8 +77,8 @@ int main() {
     // mesh.addPosition(glm::vec3(0.0f, 1.0f, 0.0f));
     
     // load the mesh for the container
-    // Mesh containerMesh = Mesh("../models/cube.obj", true, true);
-    Mesh containerMesh = Mesh("../models/sphere.obj", true, true);
+    Mesh sphereContainerMesh = Mesh("../models/sphere.obj", true, true);
+    Mesh cubeContainerMesh = Mesh("../models/cube.obj", true, true);
 
     // load the particles link mesh
     Mesh linkMesh = Mesh("../models/cylinder.obj", true, false, true);
@@ -105,12 +109,19 @@ int main() {
     // sim.createSphere(glm::vec3(-0.6f, 4.5f, 0.0f), 1.5f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
     // sim.loadMolecule("../data/fixed_rope.json");
-    sim.loadMolecule("../data/icosphere.json");
-    sim.loadMolecule("../data/icosphere.json", glm::vec3(2.0f, 0.0f, 3.0f));
+    // sim.loadMolecule("../data/icosphere.json");
+    // sim.loadMolecule("../data/icosphere.json", glm::vec3(2.0f, 0.0f, 3.0f));
 
     // setting up the container
     // sim.createCubeContainer(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), true);
-    sim.createSphereContainer(glm::vec3(0.0f, 0.0f, 0.0f), 5.0f, true);
+    // sim.createSphereContainer(glm::vec3(0.0f, 0.0f, 0.0f), 5.0f, true);
+
+    // µ Cmd
+
+    Cmd::setup(&sim);
+    Cmd::parse(argc, argv);
+
+    // µ main loop
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -164,7 +175,8 @@ int main() {
         // mesh.draw(renderer.modelShaderProgram, camera, {glm::vec3(3.0f, 1.0f, 0.0f)});
 
         glEnable(GL_BLEND); // enable transparency
-        renderer.drawContainer(camera, sim.containers, containerMesh);
+        renderer.drawContainer(camera, sim.sphereContainers, sphereContainerMesh);
+        renderer.drawContainer(camera, sim.cubeContainers, cubeContainerMesh);
         glDisable(GL_BLEND); // disable transparency
 
         // Swap buffers
