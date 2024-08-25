@@ -16,7 +16,7 @@
     "spheres": [
         {
             "position": [2, 0, 0],
-            "radius": 0.5,
+            "radius": 0.15,
             "velocity": [0, 0, 0],
             "acceleration": [0, 0, 0],
             "fixed": false
@@ -56,6 +56,10 @@
         {
             "path": "../data/fixed_rope.json",
             "offset": [0.0, 2.0, 0.0]
+        }, 
+        {
+            "path": "../data/icosphere.json",
+            "offset": [0.0, 0.0, 3.0]
         }
     ]
 }

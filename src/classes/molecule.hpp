@@ -10,10 +10,10 @@ class Molecule {
     private:
         float distance = 0.5f; // distance between the spheres centers
         float strength = 0.01f; // strength of the spring
-        float internalPressure = 0.001f; // internal pressure of the molecule
 
     public:
 
+        float internalPressure = 0.001f; // internal pressure of the molecule
         std::vector<std::shared_ptr<Sphere>> spheres;
         std::vector<std::pair<std::shared_ptr<Sphere>, std::shared_ptr<Sphere>>> links; // change this later to have multiple distances and strengths
         bool linksEnabled = false; // define if we should use the links to maintain the distance or not

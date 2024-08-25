@@ -1,5 +1,9 @@
 # TODO
 
+## CPP
+
+- Do a default world config file that is loaded if no world file is specified in the command line
+- Set the number of substeps as a cmd argument
 - Fix pointers when loading from file
 
 - Create world config json files and loader
@@ -10,3 +14,7 @@
 - Clear unnecessary includes, code, unused variables, etc.
 - Do command line arguments to change some parameters of the simulation
 - Bounce attribute for some particles : Manage bounces on the walls (because for the moment they just stop)
+
+## Rust
+
+- Remove RwLocks and use Arcs alone instead

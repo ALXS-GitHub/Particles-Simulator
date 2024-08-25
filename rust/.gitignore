@@ -1,0 +1,55 @@
+# Binaries for programs and examples
+*.exe
+*.exe~
+*.dll
+*.dylib
+*.so
+
+# Test binary, built with `cargo test`
+*.test
+
+# Rust/Cargo specific files
+/target/
+/Cargo.lock
+
+# If you're using the `cargo install` command to install binaries, you might want to ignore the installed binaries
+/.cargo/bin/
+
+# If you're using rustup, you might want to ignore the toolchains and the rustup home directory
+rustup-toolchain
+rustup-home
+
+# If you're using clippy, you might want to ignore the clippy cache
+.clippy/
+
+# If you're using rustfmt, you might want to ignore the rustfmt cache
+.rustfmt/
+
+# If you're using rust-analyzer, you might want to ignore the rust-analyzer cache
+.rust-analyzer/
+
+# If you're using IDEs like VSCode, you might want to ignore their specific files
+.vscode/
+.idea/
+
+# If you're using a debugger like GDB, you might want to ignore the GDB files
+.gdb_history
+.gdbinit
+
+# If you're using a profiler like Valgrind, you might want to ignore the Valgrind files
+.valgrind/
+
+# If you're using a coverage tool like kcov, you might want to ignore the coverage files
+.coverage/
+
+# If you're using a linter like rust-clippy, you might want to ignore the linter files
+.clippy/
+
+# If you're using a formatter like rustfmt, you might want to ignore the formatter files
+.rustfmt/
+
+# If you're using a build tool like cargo, you might want to ignore the build files
+.cargo/
+
+# If you're using a package manager like cargo, you might want to ignore the package files
+Cargo.lock

@@ -1,0 +1,17 @@
+[package]
+name = "rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+glium = "*"
+glutin = "*"
+rand = "*"
+nalgebra = "*"
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+
+[[bin]]
+
+name = "ParticlesSimulator"
+path = "src/main.rs"
