@@ -1,7 +1,9 @@
 use nalgebra::Vector3;
+use std::any::Any;
 
 use crate::classes::particles::sphere::Sphere;
 
+#[derive(Clone)]
 pub struct Container {
     pub position: Vector3<f32>,
     pub forced_inside: bool,
@@ -28,10 +30,11 @@ impl Container {
     }
 }
 
-pub trait ContainerTrait {
+pub trait ContainerTrait: Send + Sync {
     fn collide_with(&self, sphere: &mut Sphere);
     fn get_position(&self) -> Vector3<f32>;
     fn set_position(&mut self, position: Vector3<f32>);
     fn get_size(&self) -> Vector3<f32>;
     fn set_size(&mut self, size: Vector3<f32>);
+    fn as_any(&self) -> &dyn Any;
 }

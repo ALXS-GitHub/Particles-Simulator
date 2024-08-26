@@ -2,16 +2,22 @@ use nalgebra::Vector3;
 use std::sync::{Arc, RwLock};
 use std::collections::HashMap;
 use rand::Rng;
+use std::fs::File;
+use std::io::{BufReader, Read};
+use serde_json::{Value};
+use rayon::prelude::*; // for parallel processing
+use std::any::Any;
 
 use crate::classes::particle::{Particle, ParticleTrait, Collidable};
 use crate::classes::particles::sphere::{self, Sphere};
-// use crate::classes::particles::molecule::Molecule;
+use crate::classes::molecule::Molecule;
 use crate::classes::container::{Container, ContainerTrait};
 use crate::classes::containers::cube_container::CubeContainer;
 use crate::classes::containers::sphere_container::SphereContainer;
 use crate::classes::grid::Grid;
 use crate::config::{MAX_PARTICLE_RADIUS};
 use crate::{ADD_PARTICLE_NUM, NUM_SUBSTEPS};
+use crate::utils::parser::{parse_container, parse_sphere, parse_molecule};
 
 
 pub struct Simulation {
@@ -24,7 +30,7 @@ pub struct Simulation {
     pub containers: Vec<Arc<RwLock<dyn ContainerTrait>>>,
     pub cube_containers: Vec<Arc<RwLock<CubeContainer>>>,
     pub sphere_containers: Vec<Arc<RwLock<SphereContainer>>>,
-    // molecules: Vec<Arc<RwLock<Molecule>>>,
+    pub molecules: Vec<Arc<RwLock<Molecule>>>,
 }
 
 impl Simulation {
@@ -39,7 +45,7 @@ impl Simulation {
             containers: Vec::new(),
             cube_containers: Vec::new(),
             sphere_containers: Vec::new(),
-            // molecules: Vec::new(),
+            molecules: Vec::new(),
         }
     }
 
@@ -83,30 +89,38 @@ impl Simulation {
         let grid_as_vector: Vec<_> = (*self.grid).grid.iter().collect();
         let num_cells = grid_as_vector.len();
 
-        // Check collisions
-        for i in 0..num_cells {
-            let neighbors = self.grid.get_neighbors_in_cell(*grid_as_vector[i].0);
-            for s in grid_as_vector[i].1 {
+        // * parallel version
+        grid_as_vector.par_iter().enumerate().for_each(|(index, (&cell, spheres))| {
+            let neighbors = self.grid.get_neighbors_in_cell(cell);
+            for s in spheres.iter() {
                 let sphere_id = {
-                    let sphere_read = s.read().unwrap().particle.id;
-                    sphere_read
+                    if let Ok(sphere_read) = s.try_read() {
+                        sphere_read.particle.id
+                    } else {
+                        continue; // Skip if read lock is not available
+                    }
                 };
                 for neighbor in &neighbors {
                     let neighbor_id = {
-                        let neighbor_read = neighbor.read().unwrap().particle.id;
-                        neighbor_read
+                        if let Ok(neighbor_read) = neighbor.try_read() {
+                            neighbor_read.particle.id
+                        } else {
+                            continue; // Skip if read lock is not available
+                        }
                     };
                     if sphere_id != neighbor_id {
-                        let mut sphere = s.write().unwrap();
-                        sphere.collide_with_sphere(neighbor.clone());
+                        if let Ok(mut sphere) = s.try_write() {
+                            sphere.collide_with_sphere(neighbor.clone());
+                        }
                     }
                 }
                 for container in &self.containers {
-                    let mut sphere = s.write().unwrap();
-                    sphere.collide_with_container(container.clone());
+                    if let Ok(mut sphere) = s.try_write() {
+                        sphere.collide_with_container(container.clone());
+                    }
                 }
             }
-        }
+        });
 
     }
 
@@ -130,7 +144,18 @@ impl Simulation {
     }
 
     pub fn maintain_molecules(&mut self) {
-        // Method body to be provided later
+        for molecule in &self.molecules {
+            if let Ok(mut molecule) = molecule.try_write() {
+                if molecule.links_enabled {
+                    molecule.maintain_distance_links();
+                } else {
+                    molecule.maintain_distance_all();
+                }
+                if molecule.use_internal_pressure {
+                    molecule.add_internal_pressure();
+                }
+            }
+        }
     }
 
     pub fn add_sphere_to_sim(&mut self, sphere: Arc<RwLock<Sphere>>) -> Arc<RwLock<Sphere>> {
@@ -146,16 +171,122 @@ impl Simulation {
         sphere
     }
 
-    // pub fn load_molecule(&mut self, filename: String, offset: Vector3<f32>) -> Arc<RwLock<Molecule>> {
-    //     // Method body to be provided later
-    //     Arc::new(RwLock::new(Molecule {
-    //         // Initialize Molecule fields here
-    //     }))
-    // }
+    pub fn load_molecule(&mut self, filename: String, offset: Vector3<f32>) -> Arc<RwLock<Molecule>> {
+        let file = File::open(filename).expect("Unable to open file");
+        let reader = BufReader::new(file);
+        let j: Value = serde_json::from_reader(reader).expect("Unable to parse JSON");
 
-    // pub fn load_world(&mut self, filename: String) {
-    //     // Method body to be provided later
-    // }
+        // Create a new molecule
+        let mut internal_pressure = 0.001;
+        let mut use_internal_pressure = false;
+        if let Some(pressure) = j.get("internalPressure") {
+            internal_pressure = pressure.as_f64().unwrap() as f32;
+            use_internal_pressure = true;
+        }
+        let molecule = Arc::new(RwLock::new(Molecule::new(
+            Some(j["distance"].as_f64().unwrap() as f32),
+            j["linksEnabled"].as_bool(),
+            Some(j["strength"].as_f64().unwrap() as f32),
+            Some(internal_pressure),
+            Some(use_internal_pressure),
+        )));
+
+        // Create a vector to store the spheres
+        let mut spheres: Vec<Arc<RwLock<Sphere>>> = Vec::new();
+
+        // Iterate over the spheres in the molecule
+        for j_sphere in j["spheres"].as_array().unwrap() {
+            // Init the parameters
+            let mut position = Vector3::new(
+                j_sphere["position"][0].as_f64().unwrap() as f32,
+                j_sphere["position"][1].as_f64().unwrap() as f32,
+                j_sphere["position"][2].as_f64().unwrap() as f32,
+            ) + offset;
+            let radius = j_sphere["radius"].as_f64().unwrap() as f32;
+            let mut velocity = Vector3::new(0.0, 0.0, 0.0);
+            let mut acceleration = Vector3::new(0.0, 0.0, 0.0);
+            let mut fixed = false;
+
+            // Check for optional parameters
+            if let Some(fixed_value) = j_sphere.get("fixed") {
+                fixed = fixed_value.as_bool().unwrap();
+            }
+
+            if let Some(velocity_value) = j_sphere.get("velocity") {
+                velocity = Vector3::new(
+                    velocity_value[0].as_f64().unwrap() as f32,
+                    velocity_value[1].as_f64().unwrap() as f32,
+                    velocity_value[2].as_f64().unwrap() as f32,
+                );
+            }
+
+            if let Some(acceleration_value) = j_sphere.get("acceleration") {
+                acceleration = Vector3::new(
+                    acceleration_value[0].as_f64().unwrap() as f32,
+                    acceleration_value[1].as_f64().unwrap() as f32,
+                    acceleration_value[2].as_f64().unwrap() as f32,
+                );
+            }
+
+            // Create a new sphere
+            let sphere = self.create_sphere(position, radius, velocity, acceleration, fixed);
+
+            // Add the sphere to the molecule and the spheres vector
+            molecule.write().unwrap().add_sphere(sphere.clone());
+            spheres.push(sphere);
+        }
+
+        // Iterate over the links in the molecule
+        for j_link in j["links"].as_array().unwrap() {
+            // Add a link between the spheres
+            molecule.write().unwrap().add_link(
+                spheres[j_link[0].as_u64().unwrap() as usize].clone(),
+                spheres[j_link[1].as_u64().unwrap() as usize].clone(),
+            );
+        }
+
+        // Add the molecule to the simulation
+        self.molecules.push(molecule.clone());
+
+        molecule
+    }
+
+
+    pub fn load_world(&mut self, filename: String) {
+        let file = File::open(&filename).expect(&format!("file not found: {}", &filename));
+        let reader = BufReader::new(file);
+        let j: Value = serde_json::from_reader(reader).expect("Unable to parse JSON");
+
+        // load the containers
+        for j_container in j["containers"].as_array().unwrap() {
+            let container = parse_container(j_container);
+            self.containers.push(container.clone());
+            if let Ok(container_lock) = container.try_read() {
+                if let Some(cube_container) = container_lock.as_any().downcast_ref::<CubeContainer>() {
+                    self.cube_containers.push(Arc::new(RwLock::new(cube_container.clone())));
+                } else if let Some(sphere_container) = container_lock.as_any().downcast_ref::<SphereContainer>() {
+                    self.sphere_containers.push(Arc::new(RwLock::new(sphere_container.clone())));
+                }
+            };
+        }
+
+        // load the spheres
+        for j_sphere in j["spheres"].as_array().unwrap() {
+            let sphere = parse_sphere(j_sphere);
+            self.particles.push(sphere.clone());
+            self.spheres.push(sphere.clone());
+        }
+
+        // load the molecules
+        for j_molecule in j["molecules"].as_array().unwrap() {
+            let molecule = parse_molecule(j_molecule);
+            for sphere in &molecule.read().unwrap().spheres {
+                self.particles.push(sphere.clone());
+                self.spheres.push(sphere.clone());
+            }
+            self.molecules.push(molecule.clone());
+        }
+    }
 
     // § main loop events methods
 
@@ -164,7 +295,7 @@ impl Simulation {
             let mut particle = particle.write().unwrap();
             let particle_pos = particle.get_position();
             particle.add_force(Vector3::new(0.0, 10.0, 0.0) * NUM_SUBSTEPS as f32); // counter gravity
-            particle.add_force(-particle_pos * force_strength * NUM_SUBSTEPS as f32);
+            particle.add_force(-particle_pos.normalize() * force_strength * NUM_SUBSTEPS as f32);
         }
     }
 

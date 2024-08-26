@@ -61,6 +61,11 @@ impl Particle {
         }
     }
 
+    pub fn add_offset(&mut self, offset: Vector3<f32>) {
+        self.position += offset;
+        self.previous_position = self.position
+    }
+
     pub fn set_updating_enabled(&mut self, enabled: bool) {
         self.updating_enabled = enabled;
     }
@@ -68,6 +73,7 @@ impl Particle {
 
 pub trait ParticleTrait {
     fn get_position(&self) -> Vector3<f32>;
+    fn add_offset(&mut self, offset: Vector3<f32>);
     fn add_force(&mut self, force: Vector3<f32>);
     fn update_position(&mut self, dt: f32);
     fn move_by(&mut self, move_by: Vector3<f32>);

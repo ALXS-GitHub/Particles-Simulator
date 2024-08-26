@@ -5,6 +5,7 @@
 - Do a default world config file that is loaded if no world file is specified in the command line
 - Set the number of substeps as a cmd argument
 - Fix pointers when loading from file
+- Provide errors for config file loading
 
 - Create world config json files and loader
 - Create a menu in the window to change the parameters of the simulation

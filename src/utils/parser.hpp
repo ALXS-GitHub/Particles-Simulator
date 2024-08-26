@@ -140,7 +140,7 @@ std::shared_ptr<Container> parseContainer(json j) {
     } else if (type == "sphere") {
         container = std::make_shared<SphereContainer>(
             position,
-            glm::vec3(radius),
+            glm::vec3(radius * 2.0f),
             forcedInside
         );
     }

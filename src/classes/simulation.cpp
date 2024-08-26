@@ -128,7 +128,7 @@ void Simulation::maintainMolecules() {
             m->maintainDistanceAll();
         }
         if (m->useInternalPressure) {
-            m->addInternalPressure(); // TODO add a parameter to enable or disable this
+            m->addInternalPressure();
         }
     }
 }

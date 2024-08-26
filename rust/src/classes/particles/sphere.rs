@@ -16,12 +16,20 @@ impl Sphere {
             radius,
         }
     }
+
+    pub fn set_position(&mut self, position: Vector3<f32>) {
+        self.particle.position = position;
+    }
 }
 
 impl ParticleTrait for Sphere {
 
     fn get_position(&self) -> Vector3<f32> {
         self.particle.position
+    }
+
+    fn add_offset(&mut self, offset: Vector3<f32>) {
+        self.particle.add_offset(offset);
     }
 
     fn add_force(&mut self, force: Vector3<f32>) {
@@ -43,15 +51,20 @@ impl ParticleTrait for Sphere {
 
 impl Collidable for Sphere {
     fn collide_with_sphere(&mut self, other: Arc<RwLock<Sphere>>) {
-        let mut other = other.write().unwrap();
-        let axis = self.particle.position - other.particle.position;
-        let distance = axis.norm();
-        let overlap = self.radius + other.radius - distance;
-        if overlap > 0.0 {
-            let axis = axis.normalize();
-            let move_vec = axis * overlap * 0.5;
-            self.particle.move_by(move_vec);
-            other.particle.move_by(-move_vec);
+
+        if let Ok(mut other) = other.try_write() {
+            // Your code that operates on `other`
+            let axis = self.particle.position - other.particle.position;
+            let distance = axis.norm();
+            let overlap = self.radius + other.radius - distance;
+            if overlap > 0.0 {
+                let axis = axis.normalize();
+                let move_vec = axis * overlap * 0.5;
+                self.particle.move_by(move_vec);
+                other.particle.move_by(-move_vec);
+            }
+        } else {
+            return
         }
     }
 

@@ -1,0 +1,14 @@
+{
+    "containers": [
+        {
+            "type": "sphere",
+            "position": [0, 0, 0],
+            "radius": 5.0,
+            "forcedInside": true
+        }
+    ],
+    "spheres": [
+    ],
+    "molecules": [
+    ]
+}

@@ -39,7 +39,7 @@ pub fn process_key_events(key_state: &Arc<RwLock<KeyState>>, sim: &mut Simulatio
         sim.generate_random_particles(9.0);
     }
     if key_state.attract_particles {
-        sim.attract_particles_to_origin(10.0);
+        sim.attract_particles_to_origin(50.0);
     }
 
     // managed outside of this function

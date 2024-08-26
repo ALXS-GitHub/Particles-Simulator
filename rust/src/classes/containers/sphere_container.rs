@@ -3,6 +3,7 @@ use nalgebra::{Vector3};
 use crate::classes::particles::sphere::Sphere;
 use crate::classes::container::{ContainerTrait, Container};
 
+#[derive(Clone)]
 pub struct SphereContainer {
     container: Container,
     size: Vector3<f32>,
@@ -52,5 +53,9 @@ impl ContainerTrait for SphereContainer {
             let penetration = distance + sphere_radius - radius;
             sphere.particle.position -= penetration * axis.normalize();
         }
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }

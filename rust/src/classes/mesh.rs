@@ -15,7 +15,7 @@ use std::io::{BufRead, BufReader};
 
 use crate::classes::camera::{Camera};
 use crate::config::{GLuint, MAX_PARTICLES, CAMERA_ASPECT_RATIO, CAMERA_FOV, CAMERA_NEAR, CAMERA_FAR};
-use crate::classes::renderer::{InstancePosVertex, InstanceScaleVertex};
+use crate::classes::renderer::{InstancePosVertex, InstanceScaleVertex, InstanceRotationVertex};
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -71,7 +71,7 @@ pub struct Mesh {
     vbo: VertexBuffer<Vertex>,
     vbo_position: VertexBuffer<InstancePosVertex>,
     vbo_scale: VertexBuffer<InstanceScaleVertex>,
-    vbo_rot: VertexBuffer<SubVboVertexBuffer>,
+    vbo_rot: VertexBuffer<InstanceRotationVertex>,
     vertices: Vec<Vertex>,
 }
 
@@ -144,13 +144,21 @@ impl Mesh {
         let aTexCoords = VertexBuffer::new(display, &self.vertices.iter().map(|v| ATexCoordsVertex { aTexCoords : v.tex_coords}).collect::<Vec<_>>()).unwrap();
 
         target.draw((&aPos, &aNormal, &aTexCoords, self.vbo_position.per_instance().unwrap(), self.vbo_scale.per_instance().unwrap()), glium::index::NoIndices(PrimitiveType::TrianglesList), shader_program, &uniforms, &params).unwrap();
-        // target.draw((&aPos, &aNormal), glium::index::NoIndices(PrimitiveType::TrianglesList), shader_program, &uniforms, &Default::default()).unwrap();
-
     }
 
-    pub fn draw_oriented<F: Facade>(&self, shader_program: &Program, camera: &Camera, positions: &[Vector3<f32>], scales: &[Vector3<f32>], rotations: &[Vector3<f32>], display: &F) {
-        // Function body will be implemented later
-        unimplemented!()
+    pub fn draw_oriented<F: Facade>(&mut self, shader_program: &Program, camera: &Camera, positions: &[InstancePosVertex], scales: &[InstanceScaleVertex], rotations: &[InstanceRotationVertex], display: &F, target: &mut Frame, params: &DrawParameters) {
+        let uniforms = camera.get_uniforms(CAMERA_FOV, CAMERA_ASPECT_RATIO, CAMERA_NEAR, CAMERA_FAR);
+
+        self.vbo_position = glium::VertexBuffer::new(display, positions).unwrap();
+        self.vbo_scale = glium::VertexBuffer::new(display, scales).unwrap();
+        self.vbo_rot = glium::VertexBuffer::new(display, rotations).unwrap();
+
+        // extract position, normal, and tex_coords from vertices
+        let aPos = VertexBuffer::new(display, &self.vertices.iter().map(|v | APosVertex { aPos : v.position}).collect::<Vec<_>>()).unwrap();
+        let aNormal = VertexBuffer::new(display, &self.vertices.iter().map(|v| ANormalVertex { aNormal : v.normal}).collect::<Vec<_>>()).unwrap();
+        let aTexCoords = VertexBuffer::new(display, &self.vertices.iter().map(|v| ATexCoordsVertex { aTexCoords : v.tex_coords}).collect::<Vec<_>>()).unwrap();
+
+        target.draw((&aPos, &aNormal, &aTexCoords, self.vbo_position.per_instance().unwrap(), self.vbo_scale.per_instance().unwrap(), self.vbo_rot.per_instance().unwrap()), glium::index::NoIndices(PrimitiveType::TrianglesList), shader_program, &uniforms, &params).unwrap();
     }
 
     pub fn load_from_file(&mut self, filename: &str) {

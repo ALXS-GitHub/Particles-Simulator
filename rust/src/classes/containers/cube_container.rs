@@ -3,6 +3,7 @@ use nalgebra::{Vector3};
 use crate::classes::particles::sphere::Sphere;
 use crate::classes::container::{ContainerTrait, Container};
 
+#[derive(Clone)]
 pub struct CubeContainer {
     container: Container,
     size: Vector3<f32>,
@@ -62,5 +63,9 @@ impl ContainerTrait for CubeContainer {
         if sphere_position.z + sphere_radius > max.z {
             sphere.particle.position.z = max.z - sphere_radius;
         }
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }

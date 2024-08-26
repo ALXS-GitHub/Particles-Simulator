@@ -10,8 +10,19 @@ rand = "*"
 nalgebra = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
+rayon = "*"
 
 [[bin]]
 
 name = "ParticlesSimulator"
 path = "src/main.rs"
+
+[profile.dev]
+opt-level = 0
+
+[profile.bench]
+opt-level = 3
+debug = true
+
+[profile.release]
+opt-level = 3

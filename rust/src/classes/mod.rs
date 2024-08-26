@@ -7,3 +7,4 @@ pub mod camera;
 pub mod mesh;
 pub mod grid;
 pub mod simulation;
+pub mod molecule;
