@@ -10,6 +10,7 @@ use std::time::{Duration, Instant};
 // importing modules
 pub mod classes;
 mod config;
+mod cmd;
 pub mod utils;
 
 use classes::container::ContainerTrait;
@@ -18,9 +19,11 @@ use classes::simulation::Simulation;
 use classes::{camera, container, mesh, renderer};
 
 use crate::config::*;
+use crate::cmd::*;
 
 use utils::camera_utils::{handle_camera_motion, handle_motion, CameraState};
 use utils::key_events::{handle_key_events, process_key_events, KeyState};
+use utils::drag_particles::{self, DragParticles, DragState};
 
 pub const TARGET_FPS: i32 = 60;
 pub const NUM_SUBSTEPS: i32 = 8;
@@ -89,6 +92,13 @@ fn main() {
     let mut linkMesh = mesh::Mesh::new(&display, "../models/cylinder.obj", true, false, true);
 
     let mut sim = Simulation::new();
+    let mut cmd = Cmd {
+        sim: &mut sim,
+        world_file: String::from("")
+    };
+
+    let mut drag_particles = DragParticles::new(true);
+    let mut drag_state = Arc::new(RwLock::new(DragState::new()));
 
     // sim.create_cube_container(Vector3::new(0.0, 0.0, 0.0), Vector3::new(10.0, 10.0, 10.0), true);
     // sim.create_sphere_container(Vector3::new(0.0, 0.0, 0.0), 5.0, true);
@@ -111,7 +121,11 @@ fn main() {
     //     String::from("../data/icosphere.json"),
     //     Vector3::new(0.0, 0.0, 0.0),
     // );
-    sim.load_world(String::from("../data/world_test.json"));
+    // sim.load_world(String::from("../data/world_test.json"));
+    // cmd.world_file_command(String::from("../data/world2.json"));
+
+    let args: Vec<String> = std::env::args().collect();
+    cmd.parse(args);
 
     let mut last_cursor_pos: Option<(f64, f64)> = None;
     let right_mouse_button_pressed = Arc::new(RwLock::new(false));
@@ -220,6 +234,10 @@ fn main() {
 
             process_key_events(&key_state, &mut sim);
 
+            drag_particles.process_drag(&camera, &mut sim, &drag_state);
+
+            // println!("Internal pressure of the first molecule: {}", sim.molecules[0].write().unwrap().internal_pressure);
+
             last_update_time = now;
         }
 
@@ -233,6 +251,11 @@ fn main() {
                     &camera_state,
                 );
                 handle_key_events(&event, &key_state);
+                drag_particles.handle_drag_controls(
+                    &event,
+                    &mut last_cursor_pos,
+                    &drag_state
+                );
                 match event {
                     glium::winit::event::WindowEvent::CloseRequested => window_target.exit(),
                     // We now need to render everyting in response to a RedrawRequested event due to the animation

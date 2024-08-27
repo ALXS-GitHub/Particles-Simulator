@@ -42,16 +42,18 @@ pub fn parse_molecule(j: &Value) -> Arc<RwLock<Molecule>> {
     };
 
     let internal_pressure = j.get("internalPressure").and_then(|ip| ip.as_f64()).map(|ip| ip as f32);
-    let use_internal_pressure = j.get("internalPressure").and_then(|uip| uip.as_bool());
+    let use_internal_pressure = internal_pressure.is_some();
 
     let mut molecule = Molecule::new(
         Some(j["distance"].as_f64().unwrap() as f32),
         Some(j["linksEnabled"].as_bool().unwrap()),
         Some(j["strength"].as_f64().unwrap() as f32),
         internal_pressure,
-        use_internal_pressure,
+        Some(use_internal_pressure),
         );
 
+        println!("loading molecule with internal pressure: {:?}", internal_pressure);
+        println!("loading molecule with use internal pressure: {:?}", use_internal_pressure);
         
     let mut spheres = vec![];
 

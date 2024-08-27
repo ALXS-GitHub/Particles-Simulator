@@ -75,8 +75,8 @@ void Cmd::parse(int argc, char* argv[]) {
     }
 
     if (worldFile == "") {
-        cerr << "Error: No world file specified" << endl;
-        exit(1);
+        cout << "Warning: No world file specified. Using default world file" << endl;
+        worldFileCommand("../data/world_default.json");
     }
 }
 

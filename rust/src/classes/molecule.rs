@@ -42,7 +42,7 @@ impl Molecule {
             links: Vec::new(),
             links_enabled: links_enabled.unwrap_or(default.links_enabled),
             use_internal_pressure: use_internal_pressure.unwrap_or(default.use_internal_pressure),
-        }
+        } 
     }
 
     pub fn add_sphere(&mut self, sphere: Arc<RwLock<Sphere>>) {

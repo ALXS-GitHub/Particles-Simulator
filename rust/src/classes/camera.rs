@@ -8,7 +8,7 @@ use na::{Matrix4, Point3, Vector3};
 use std::f32::consts::PI;
 
 pub struct Camera {
-    position: Vector3<f32>,
+    pub position: Vector3<f32>,
     direction: Vector3<f32>,
     up: Vector3<f32>,
 }
