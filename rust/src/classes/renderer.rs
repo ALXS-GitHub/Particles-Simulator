@@ -21,6 +21,8 @@ use crate::classes::container::{ContainerTrait, Container};
 use crate::classes::camera::{Camera};
 use crate::classes::mesh::{Mesh, SubVboVertexBuffer};
 
+use crate::utils::filepath::get_path;
+
 // TODO do the renderer after
 
 #[derive(Copy, Clone)]
@@ -61,11 +63,11 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(display: &Display<WindowSurface>) -> Result<Renderer, Box<dyn Error>> {
-        let shader_program = Renderer::create_shader_program_with_geometry(display, "../shaders/vertexShader.glsl", "../shaders/geometryShader.glsl", "../shaders/fragmentShader.glsl")?;
-        let floor_shader_program = Renderer::create_shader_program(display, "../shaders/floorVertexShader.glsl", "../shaders/floorFragmentShader.glsl")?;
-        let model_shader_program = Renderer::create_shader_program(display, "../shaders/modelVertexShader.glsl", "../shaders/modelFragmentShader.glsl")?;
-        let container_shader_program = Renderer::create_shader_program(display, "../shaders/containerVertexShader.glsl", "../shaders/containerFragmentShader.glsl")?;
-        let molecule_links_shader_program = Renderer::create_shader_program(display, "../shaders/modelOrientedVertexShader.glsl", "../shaders/modelFragmentShader.glsl")?;
+        let shader_program = Renderer::create_shader_program_with_geometry(display, &get_path("shaders/vertexShader.glsl"), &get_path("shaders/geometryShader.glsl"), &get_path("shaders/fragmentShader.glsl"))?;
+        let floor_shader_program = Renderer::create_shader_program(display, &get_path("shaders/floorVertexShader.glsl"), &get_path("shaders/floorFragmentShader.glsl"))?;
+        let model_shader_program = Renderer::create_shader_program(display, &get_path("shaders/modelVertexShader.glsl"), &get_path("shaders/modelFragmentShader.glsl"))?;
+        let container_shader_program = Renderer::create_shader_program(display, &get_path("shaders/containerVertexShader.glsl"), &get_path("shaders/containerFragmentShader.glsl"))?;
+        let molecule_links_shader_program = Renderer::create_shader_program(display, &get_path("shaders/modelOrientedVertexShader.glsl"), &get_path("shaders/modelFragmentShader.glsl"))?;
 
         Ok(Renderer {
             shader_program,

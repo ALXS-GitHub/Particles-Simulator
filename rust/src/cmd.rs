@@ -2,6 +2,7 @@ use clap::{Arg, Command, ArgAction};
 use std::sync::{Arc, Mutex};
 use std::process;
 use crate::classes::simulation::Simulation;
+use crate::utils::filepath::get_path;
 
 pub struct Cmd<'a> {
     pub sim: &'a mut Simulation,
@@ -63,7 +64,7 @@ impl<'a> Cmd<'a> {
             self.world_file_command(self.world_file.clone());
         } else {
             println!("Warning: No world file specified. Using default world file");
-            self.world_file_command(String::from("../data/world_default.json"));
+            self.world_file_command(get_path("data/world_default.json"));
         }
 
     }

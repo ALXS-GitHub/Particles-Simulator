@@ -1,8 +1,11 @@
+#![windows_subsystem = "windows"]
+
 // importing libraries
 use glium::winit::event::WindowEvent;
 use glium::Surface;
 use nalgebra::{Vector, Vector3};
-use rayon::ThreadPoolBuilder;
+use rayon::{ThreadPoolBuilder};
+use num_cpus;
 use std::sync::{Arc, RwLock};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
@@ -20,6 +23,7 @@ use classes::{camera, container, mesh, renderer};
 
 use crate::config::*;
 use crate::cmd::*;
+use crate::utils::filepath::get_path;
 
 use utils::camera_utils::{handle_camera_motion, handle_motion, CameraState};
 use utils::key_events::{handle_key_events, process_key_events, KeyState};
@@ -30,9 +34,15 @@ pub const NUM_SUBSTEPS: i32 = 8;
 pub const ADD_PARTICLE_NUM: i32 = 10;
 
 fn main() {
+
+    println!("Starting Particle Simulator");
+
+    let MAX_NUM_THREADS : usize = num_cpus::get();
+    println!("Using {} threads", MAX_NUM_THREADS);
+
     // Set the number of threads to 4
     ThreadPoolBuilder::new()
-        .num_threads(1)
+        .num_threads(MAX_NUM_THREADS)
         .build_global()
         .unwrap();
 
@@ -85,11 +95,11 @@ fn main() {
     let key_state = Arc::new(RwLock::new(KeyState::new()));
 
     let mut sphereMesh =
-        mesh::Mesh::new(&display, "../models/sphere_ico_low.obj", true, true, false);
-    let mut cubeContainerMesh = mesh::Mesh::new(&display, "../models/cube.obj", true, true, true);
+        mesh::Mesh::new(&display, &get_path("models/sphere_ico_low.obj"), true, true, false);
+    let mut cubeContainerMesh = mesh::Mesh::new(&display, &get_path("models/cube.obj"), true, true, true);
     let mut sphereContainerMesh =
-        mesh::Mesh::new(&display, "../models/sphere.obj", true, true, true);
-    let mut linkMesh = mesh::Mesh::new(&display, "../models/cylinder.obj", true, false, true);
+        mesh::Mesh::new(&display, &get_path("models/sphere.obj"), true, true, true);
+    let mut linkMesh = mesh::Mesh::new(&display, &get_path("models/cylinder.obj"), true, false, true);
 
     let mut sim = Simulation::new();
     let mut cmd = Cmd {
@@ -200,7 +210,10 @@ fn main() {
             let container_trait_vec: Vec<Arc<RwLock<dyn ContainerTrait>>> = sim
                 .cube_containers
                 .iter()
-                .map(|container| container.clone() as Arc<RwLock<dyn ContainerTrait>>)
+                .map(|container| {
+                    let container_clone: Arc<RwLock<dyn ContainerTrait>> = Arc::new(RwLock::new(container.read().unwrap().clone()));
+                    container_clone
+                })
                 .collect();
 
             renderer.draw_container(
@@ -216,7 +229,10 @@ fn main() {
             let container_trait_vec: Vec<Arc<RwLock<dyn ContainerTrait>>> = sim
                 .sphere_containers
                 .iter()
-                .map(|container| container.clone() as Arc<RwLock<dyn ContainerTrait>>)
+                .map(|container| {
+                    let container_clone: Arc<RwLock<dyn ContainerTrait>> = Arc::new(RwLock::new(container.read().unwrap().clone()));
+                    container_clone
+                })
                 .collect();
 
             renderer.draw_container(

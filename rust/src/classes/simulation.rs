@@ -22,7 +22,6 @@ use crate::utils::parser::{parse_container, parse_sphere, parse_molecule};
 
 pub struct Simulation {
     pub num_particles: i32,
-    pub num_threads: i32,
     pub grid: Box<Grid>, // Box is used for heap allocation, Option for nullable
     pub particles: Vec<Arc<RwLock<dyn ParticleTrait + Send + Sync>>>,
     pub spheres: Vec<Arc<RwLock<Sphere>>>,
@@ -37,7 +36,6 @@ impl Simulation {
     pub fn new() -> Self {
         Simulation {
             num_particles: 0,
-            num_threads: 4,
             grid: Box::new(Grid::new(MAX_PARTICLE_RADIUS * 2.0)),
             particles: Vec::new(),
             spheres: Vec::new(),

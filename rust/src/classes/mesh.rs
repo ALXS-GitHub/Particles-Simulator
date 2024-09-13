@@ -164,7 +164,7 @@ impl Mesh {
     pub fn load_from_file(&mut self, filename: &str) {
         let file = match File::open(filename) {
             Ok(file) => file,
-            Err(error) => panic!("Error opening file: {}", error),
+            Err(error) => panic!("Error opening file: {} - {}", filename, error),
         };
         let reader = BufReader::new(file);
 

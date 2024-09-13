@@ -2,6 +2,7 @@
 name = "rust"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 glium = "*"
@@ -12,9 +13,9 @@ serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 rayon = "*"
 clap = "*"
+num_cpus = "*"
 
 [[bin]]
-
 name = "ParticlesSimulator"
 path = "src/main.rs"
 
@@ -24,6 +25,7 @@ opt-level = 0
 [profile.bench]
 opt-level = 3
 debug = true
+debug-assertions = true
 
 [profile.release]
 opt-level = 3
